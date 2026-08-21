@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "wanyi-memory-core"
+version = "5.0.0"
+description = "永不遗忘的全量记忆系统 — 事件溯源 + 过程记忆 + 语义向量检索 + reranker精排 + 记忆图谱 + 元认知知识空白，23个MCP工具"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Zhao Xikun" }]
+keywords = ["memory", "mcp", "long-term-memory", "agent", "rag", "vector", "knowledge-graph", "metacognition"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+vector = ["sentence-transformers>=2.7"]
+rerank = ["sentence-transformers>=2.7"]
+all = ["sentence-transformers>=2.7"]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+wanyi = "wanyi.memory_core:main"
+
+[project.urls]
+Homepage = "https://github.com/zhaoxikun/wanyi-memory-core"
+Repository = "https://github.com/zhaoxikun/wanyi-memory-core"
+Documentation = "https://github.com/zhaoxikun/wanyi-memory-core"
+
+[tool.hatch.build.targets.wheel]
+packages = ["wanyi"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

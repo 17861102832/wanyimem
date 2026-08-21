@@ -1,0 +1,74 @@
+# ── 隐私红线：绝不提交个人记忆数据 ─────────────────────────────
+# 你的记忆库、向量、索引、档案都是隐私，永不上传
+memory/
+db/
+法/
+术/
+*.db
+*.db-wal
+*.db-shm
+*.sql
+event_logs/
+compressed/
+sleep_consolidation/
+index.json
+user_profile.json
+*.jsonl
+
+# ── 环境变量与密钥 ────────────────────────────────────────────
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+
+# ── Python ─────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+env/
+ENV/
+
+# ── 测试与缓存 ─────────────────────────────────────────────────
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+.pyre/
+.hypothesis/
+
+# ── 编辑器/系统 ────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.tmp

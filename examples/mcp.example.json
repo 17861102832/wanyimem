@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "wanyi": {
+      "command": "python",
+      "args": ["-m", "wanyi.memory_core"],
+      "env": {
+        "万忆中枢_STORE_DIR": "C:/path/to/your/memory",
+        "万忆中枢_USER_PROFILE": "C:/path/to/user_profile.md",
+        "万忆中枢_TRADING_ANCHOR": "C:/path/to/trading_anchor.md",
+        "HF_ENDPOINT": "https://hf-mirror.com",
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUTF8": "1"
+      }
+    }
+  }
+}
