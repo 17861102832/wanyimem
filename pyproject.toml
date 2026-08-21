@@ -35,9 +35,9 @@ test = ["pytest>=7.0"]
 wanyi = "wanyi.memory_core:main"
 
 [project.urls]
-Homepage = "https://github.com/zhaoxikun/wanyi-memory-core"
-Repository = "https://github.com/zhaoxikun/wanyi-memory-core"
-Documentation = "https://github.com/zhaoxikun/wanyi-memory-core"
+Homepage = "https://github.com/17861102832/wanyi-memory-core"
+Repository = "https://github.com/17861102832/wanyi-memory-core"
+Documentation = "https://github.com/17861102832/wanyi-memory-core"
 
 [tool.hatch.build.targets.wheel]
 packages = ["wanyi"]
