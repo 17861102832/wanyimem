@@ -8,10 +8,10 @@
 ## 一、安装
 
 ```bash
-pip install "wanyi-memory-core[all]"
+pip install "wanyimem[all]"
 ```
 
-`[all]` 会安装向量与精排所需的 `sentence-transformers`。仅想先试核心功能可以只装 `wanyi-memory-core`（无模型时自动降级为关键词检索，功能不崩）。
+`[all]` 会安装向量与精排所需的 `sentence-transformers`。仅想先试核心功能可以只装 `wanyimem`（无模型时自动降级为关键词检索，功能不崩）。
 
 ### 国内加速
 

@@ -24,8 +24,8 @@ WanYi Memory Core is a **local-first, full-quantity, self-evolving memory system
 ## Install
 
 ```bash
-pip install wanyi-memory-core            # core
-pip install "wanyi-memory-core[all]"     # + vector & reranker models deps
+pip install wanyimem            # core
+pip install "wanyimem[all]"     # + vector & reranker models deps
 ```
 
 Requires Python 3.10+. Models (embedding ~95MB, reranker ~1.1GB) are downloaded on first use from HuggingFace; set `HF_ENDPOINT=https://hf-mirror.com` if you are in mainland China.

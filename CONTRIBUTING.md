@@ -5,8 +5,8 @@
 ## 环境准备
 
 ```bash
-git clone https://github.com/17861102832/wanyi-memory-core
-cd wanyi-memory-core
+git clone https://github.com/17861102832/wanyimem
+cd wanyimem
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[test]"
 ```

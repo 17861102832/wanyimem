@@ -24,8 +24,8 @@
 ## 安装
 
 ```bash
-pip install wanyi-memory-core            # 核心
-pip install "wanyi-memory-core[all]"     # 含向量 & 精排模型依赖
+pip install wanyimem            # 核心
+pip install "wanyimem[all]"     # 含向量 & 精排模型依赖
 ```
 
 需要 Python 3.10+。模型（向量 ~95MB、精排 ~1.1GB）首次使用时自动从 HuggingFace 下载；国内用户设置 `HF_ENDPOINT=https://hf-mirror.com` 走镜像。
