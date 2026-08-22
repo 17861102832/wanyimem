@@ -1,0 +1,33 @@
+version: 2
+
+updates:
+  # Python 依赖（pyproject.toml / hatchling）
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      dev-dependencies:
+        dependency-type: "development"
+    open-pull-requests-limit: 10
+    versioning-strategy: "auto"
+    commit-message:
+      prefix: "build(deps)"
+      prefix-development: "build(deps-dev)"
+
+  # GitHub Actions 自身（workflow 用到的 action 版本）
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci(deps)"

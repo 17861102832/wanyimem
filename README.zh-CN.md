@@ -6,6 +6,8 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Version](https://img.shields.io/badge/version-1.0.0-orange)
 ![MCP](https://img.shields.io/badge/MCP-server-purple)
+[![CI](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml/badge.svg)](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/wanyimem)](https://pypi.org/project/wanyimem/)
 
 ---
 
