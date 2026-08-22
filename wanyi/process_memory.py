@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════╗
 ║        万忆中枢 v4 — 过程记忆模块（process_memory.py）          ║
@@ -13,12 +12,10 @@
 ║  - 经验库自动沉淀（成功 → 可复用模式）                           ║
 ╚══════════════════════════════════════════════════════════════════╝
 """
+import hashlib
 import json
 import time
-import uuid
-import hashlib
 from datetime import datetime
-from typing import List
 
 # 轨迹阶段（ExpeL 五段式）
 PHASE_PLAN = "规划"      # 任务理解与方案设计
@@ -131,7 +128,7 @@ class ProcessMemory:
             "phase_count": len(rows),
         }
 
-    def list_processes(self, task_name: str = None, limit: int = 20) -> List[dict]:
+    def list_processes(self, task_name: str = None, limit: int = 20) -> list[dict]:
         """列出轨迹（可按任务筛选）"""
         sql = "SELECT DISTINCT process_id, task_name, MAX(timestamp) as last_ts FROM process_events"
         params = []
@@ -261,7 +258,7 @@ class ProcessMemory:
         return {"mistake_id": mistake_id, "status": "learned"}
 
     def list_mistakes(self, task_name: str = None, pattern: str = None,
-                      limit: int = 50) -> List[dict]:
+                      limit: int = 50) -> list[dict]:
         """错题本查询（含模式频次统计 — reflect 式）"""
         sql = "SELECT * FROM mistakes WHERE 1=1"
         params = []
@@ -276,7 +273,7 @@ class ProcessMemory:
         rows = self.db.conn.execute(sql, params).fetchall()
         return [dict(r, tags=json.loads(r["tags"] or "[]")) for r in rows]
 
-    def get_error_patterns(self) -> List[dict]:
+    def get_error_patterns(self) -> list[dict]:
         """高频错误模式（reflect 式 get_error_patterns）"""
         rows = self.db.conn.execute("""
             SELECT pattern, COUNT(*) as count, COUNT(DISTINCT task_name) as tasks
@@ -316,7 +313,7 @@ class ProcessMemory:
                           scope="进化")
         return {"experience_id": experience_id, "deduped": False}
 
-    def list_experiences(self, task_name: str = None, limit: int = 50) -> List[dict]:
+    def list_experiences(self, task_name: str = None, limit: int = 50) -> list[dict]:
         """经验库查询"""
         sql = "SELECT * FROM experiences WHERE 1=1"
         params = []

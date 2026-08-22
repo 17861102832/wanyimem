@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════╗
 ║           万 忆 中 枢  v3 — 众神指令完整版                    ║
@@ -18,18 +17,17 @@
 ║  隐私：四级隐私分级（公开/内部/机密/绝密）                         ║
 ╚══════════════════════════════════════════════════════════════════╝
 """
-import os
-import sys
-import json
-import sqlite3
 import hashlib
-import re
+import json
 import math
+import os
+import re
+import sqlite3
+import sys
 import time
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, List, Dict, Any
 
 # ═══════════════════════════════════════════════════════════════════
 # 环境变量与路径配置
@@ -123,7 +121,7 @@ def safe_json_loads(s, default=None):
 _CJK_RE = re.compile(r'[\u4e00-\u9fff]+')
 _EN_RE = re.compile(r'[a-zA-Z0-9_]+')
 
-def tokenize_cn(text: str) -> List[str]:
+def tokenize_cn(text: str) -> list[str]:
     """极简中文分词：2-4字滑动窗口 + 英文数字整词"""
     tokens = []
     # 英文/数字整词
@@ -598,19 +596,19 @@ class MemoryDB:
 
     def upsert_memory(self, content: str, layer: str = LAYER_SHU,
                       mem_type: str = "observation",
-                      category: Optional[str] = None,
+                      category: str | None = None,
                       space: str = SPACE_GLOBAL,
-                      project: Optional[str] = None,
+                      project: str | None = None,
                       privacy: str = PRIVACY_INTERNAL,
-                      source: Optional[str] = None,
-                      tags: Optional[List[str]] = None,
+                      source: str | None = None,
+                      tags: list[str] | None = None,
                       confidence: float = 0.7,
-                      importance: Optional[float] = None,
+                      importance: float | None = None,
                       pinned: bool = False,
-                      memory_id: Optional[str] = None,
-                      session_id: Optional[str] = None,
-                      task_id: Optional[str] = None,
-                      metadata: Optional[dict] = None) -> dict:
+                      memory_id: str | None = None,
+                      session_id: str | None = None,
+                      task_id: str | None = None,
+                      metadata: dict | None = None) -> dict:
         """
         写入或更新一条记忆。
         如果 memory_id 已存在则版本+1（事件溯源，旧版本不删除）。
@@ -665,7 +663,6 @@ class MemoryDB:
 
         # ═══ v4：写入口分级路由 + L0 真相源 ═══
         # 全量落库（无拒收），只做分级路由和暴露控制
-        route_layer = actual_layer
         route_scope = "对话"
         if actual_layer == LAYER_DAO:
             route_scope = "决策" if mem_type in ("decision", "preference") else "进化"
@@ -733,7 +730,7 @@ class MemoryDB:
                 rows
             )
 
-    def get_memory(self, memory_id: str) -> Optional[dict]:
+    def get_memory(self, memory_id: str) -> dict | None:
         row = self.conn.execute(
             "SELECT * FROM memories WHERE memory_id = ?", (memory_id,)
         ).fetchone()
@@ -744,7 +741,7 @@ class MemoryDB:
     def recall(self, query: str, layer: str = "all",
                space: str = None, project: str = None,
                privacy_max: str = PRIVACY_TOP_SECRET,
-               limit: int = 20, min_confidence: float = 0.3) -> List[dict]:
+               limit: int = 20, min_confidence: float = 0.3) -> list[dict]:
         """
         三路混合检索：FTS5(BM25) 关键词 + 关键词倒排 + 四因子重排
         返回 Top-K 相关记忆
@@ -977,7 +974,7 @@ class MemoryDB:
         return {"event_seq": seq, "timestamp": now}
 
     def list_events(self, session_id: str = None, event_type: str = None,
-                    scope: str = None, limit: int = 100) -> List[dict]:
+                    scope: str = None, limit: int = 100) -> list[dict]:
         sql = "SELECT * FROM session_events WHERE 1=1"
         params = []
         if session_id:
@@ -994,7 +991,7 @@ class MemoryDB:
         rows = self.conn.execute(sql, params).fetchall()
         return [dict(r, event_data=safe_json_loads(r["event_data"])) for r in rows]
 
-    def replay_events(self, since_seq: int = 0, scope: str = None) -> List[dict]:
+    def replay_events(self, since_seq: int = 0, scope: str = None) -> list[dict]:
         """
         事件回放：从日志重建物化视图（事件溯源 / CQRS 思想）
         崩溃恢复、跨会话续传、进化追溯都靠它。
@@ -1008,7 +1005,7 @@ class MemoryDB:
         rows = self.conn.execute(sql, params).fetchall()
         return [dict(r, event_data=safe_json_loads(r["event_data"])) for r in rows]
 
-    def evolution_log(self, limit: int = 50) -> List[dict]:
+    def evolution_log(self, limit: int = 50) -> list[dict]:
         """最近进化记录（谁变了、为什么变、置信度变化）— 进化的可观测性"""
         rows = self.conn.execute("""
             SELECT * FROM session_events
@@ -1030,7 +1027,7 @@ class MemoryDB:
               json.dumps(state, ensure_ascii=False), now, session_id))
         self.conn.commit()
 
-    def load_checkpoint(self, ckpt_id: str) -> Optional[dict]:
+    def load_checkpoint(self, ckpt_id: str) -> dict | None:
         row = self.conn.execute(
             "SELECT * FROM task_checkpoints WHERE checkpoint_id = ?", (ckpt_id,)
         ).fetchone()
@@ -1040,7 +1037,7 @@ class MemoryDB:
         d["state"] = safe_json_loads(d["state"])
         return d
 
-    def list_checkpoints(self, task_name: str = None) -> List[dict]:
+    def list_checkpoints(self, task_name: str = None) -> list[dict]:
         if task_name:
             rows = self.conn.execute("""
                 SELECT * FROM task_checkpoints WHERE task_name = ?
@@ -1110,7 +1107,7 @@ class MemoryDB:
         return edge_id
 
     def get_neighbors(self, node_id: str, depth: int = 1,
-                      relation: str = None, limit: int = 50) -> List[dict]:
+                      relation: str = None, limit: int = 50) -> list[dict]:
         """获取节点邻居（支持多跳）"""
         if depth <= 1:
             sql = """
@@ -1159,7 +1156,7 @@ class MemoryDB:
     # ── v5.3 记忆关系图谱：写入后自动建边 ───────────────────────────
 
     def auto_graph_link(self, memory_id: str, content: str,
-                        layer: str, category: Optional[str],
+                        layer: str, category: str | None,
                         max_links: int = 5):
         """
         写入记忆后自动建边（记忆作为图谱节点）：
@@ -1229,7 +1226,7 @@ class MemoryDB:
         except Exception:
             pass
 
-    def graph_search(self, query: str, depth: int = 2, limit: int = 20) -> List[dict]:
+    def graph_search(self, query: str, depth: int = 2, limit: int = 20) -> list[dict]:
         """
         图谱扩展检索：从查询中提取实体 → 多跳遍历 → 返回关联记忆
         """
@@ -1483,9 +1480,9 @@ class WanYiCore:
         init_dirs()
         self.db = MemoryDB(DB_PATH)
         # ═══ v4：挂载三大新模块 ═══
-        from process_memory import ProcessMemory
         from confidence import Confidence
         from gardener import Gardener
+        from process_memory import ProcessMemory
         self.process = ProcessMemory(self.db, SESSION_ID)
         self.confidence = Confidence(self.db, SESSION_ID)
         self.gardener = Gardener(self.db, SESSION_ID, OBSIDIAN_VAULT)
@@ -2135,12 +2132,10 @@ class WanYiCore:
 
         # 4) 决策结论
         verdict = "PASS"
-        block_reason = None
         warnings = []
 
         if risk["is_risky"] and current_conf < threshold:
             verdict = "BLOCK"
-            block_reason = f"【置信度拦截】风险等级={risk['risk_level']}，需要置信度≥{threshold:.2f}，当前只有{current_conf:.2f}"
         elif risk["risk_level"] == "critical" and current_conf < threshold + 0.05:
             verdict = "CAUTION"
             warnings.append(f"接近临界阈值：置信度{current_conf:.2f}，阈值{threshold:.2f}，建议三思")
@@ -2237,7 +2232,7 @@ class WanYiCore:
     def _generate_advice(self, verdict, risk, conf, threshold, gotchas) -> str:
         """根据拦截结果生成人类可读的建议"""
         if verdict == "BLOCK":
-            advice = f"🛑 【万忆拦截】兄弟，停一下。\n"
+            advice = "🛑 【万忆拦截】兄弟，停一下。\n"
             advice += f"你要做的这件事风险等级是 {risk['risk_level']}，但你对这件事的判断置信度只有 {conf:.2f}（需要≥{threshold:.2f}）。\n"
             if gotchas:
                 advice += f"\n🚨 历史已经警告过你 {len(gotchas)} 次类似的坑：\n"
@@ -2287,8 +2282,9 @@ class WanYiCore:
           - get：查看单个分支对
           - auto_check_due：自动检查到期未结算的分支并提醒
         """
-        import hashlib, json as _json
-        from datetime import datetime, timedelta
+        import hashlib
+        import json as _json
+        from datetime import datetime
 
         cur = self.db.conn.cursor()
         now = now_iso()
@@ -2416,7 +2412,7 @@ class WanYiCore:
                 elif fact == "avoided" and risk in ("critical", "high"):
                     counter_outcome = (
                         "如果当时做了，按照历史同类高风险决策的经验，"
-                        f"大概率会陷入追涨被套/删库事故/强推翻车的典型模式。"
+                        "大概率会陷入追涨被套/删库事故/强推翻车的典型模式。"
                     )
                 else:
                     counter_outcome = "反事实路径的结果无法精确推算，需要更多同类样本。"
@@ -2434,17 +2430,17 @@ class WanYiCore:
                 if neg > pos:
                     verdict = "counter_won"
                     if not auto_lesson:
-                        auto_lesson = f"🚨 这次没听劝，结果验证了万忆当时的拦截是对的。教训：高风险决策前的BLOCK不是吓唬人。"
+                        auto_lesson = "🚨 这次没听劝，结果验证了万忆当时的拦截是对的。教训：高风险决策前的BLOCK不是吓唬人。"
                 elif pos > neg:
                     verdict = "fact_won"
                     if not auto_lesson:
-                        auto_lesson = f"这次高风险动作结果尚可，但仍属幸存者偏差，同类动作下次仍需谨慎。"
+                        auto_lesson = "这次高风险动作结果尚可，但仍属幸存者偏差，同类动作下次仍需谨慎。"
                 else:
                     verdict = "neutral"
             elif pair.get("fact_path") == "avoided" and pair.get("risk_level") in ("critical", "high"):
                 verdict = "fact_won"
                 if not auto_lesson:
-                    auto_lesson = f"这次听劝没做，避免了潜在的高风险损失。"
+                    auto_lesson = "这次听劝没做，避免了潜在的高风险损失。"
 
             if not auto_lesson:
                 auto_lesson = "待进一步复盘。"
@@ -2520,7 +2516,8 @@ class WanYiCore:
           - list_patterns：列出已沉淀的跨域模式（按hit_count排序）
           - get：查看单个模式详情（含来源引用）
         """
-        import json as _json, hashlib as _hashlib
+        import hashlib as _hashlib
+        import json as _json
         now = now_iso()
         cur = self.db.conn.cursor()
 
@@ -2655,8 +2652,6 @@ class WanYiCore:
           - route：对比「实际路径」vs「如果全听劝路径」两条虚拟人生轨迹
           - review：最近N天决策回顾总结（新增分支/结算/趋势）
         """
-        import json as _json
-        now = now_iso()
         cur = self.db.conn.cursor()
 
         # ── timeline：决策生涯时间线 ──────────────────────────────
@@ -2808,8 +2803,6 @@ class WanYiCore:
           - weekly_review：每周轨迹回放复盘（stats+route+review 合成总结）
           - alert：风险关键词扫描（消息里出现高风险词时快速告警）
         """
-        import json as _json
-        from datetime import datetime, timedelta
         now = now_iso()
         today = now[:10]
         cur = self.db.conn.cursor()
@@ -3493,7 +3486,7 @@ def _read_exact(n: int) -> bytes:
     return data
 
 
-def _read_message() -> Optional[dict]:
+def _read_message() -> dict | None:
     """读取一条MCP消息（Content-Length帧协议）"""
     import json as _json
     # 读取头部直到空行
@@ -3531,7 +3524,6 @@ def _write_message(msg: dict):
 
 def main():
     """标准MCP stdio传输层（Content-Length帧协议）"""
-    import json as _json
     # 通知类型的方法（不需要响应）
     NOTIFICATION_METHODS = {
         "notifications/initialized",

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════╗
 ║          万忆中枢 v4 — 认知置信度模块（confidence.py）          ║
@@ -15,9 +14,7 @@
 ╚══════════════════════════════════════════════════════════════════╝
 """
 import json
-import math
 from datetime import datetime
-from typing import List
 
 # 三分量权重（KektorDB 公式）
 W_CONSENSUS = 0.40
@@ -183,7 +180,7 @@ class Confidence:
 
     # ── 聚合查询 ──────────────────────────────────────────────────
 
-    def rank_by_confidence(self, target_type: str, limit: int = 20) -> List[dict]:
+    def rank_by_confidence(self, target_type: str, limit: int = 20) -> list[dict]:
         """按置信度排序（检索排序用，不删除）"""
         rows = self.db.conn.execute("""
             SELECT * FROM confidence WHERE target_type = ?
@@ -192,7 +189,7 @@ class Confidence:
         return [dict(r) for r in rows]
 
     def needs_review(self, target_type: str, min_age_days: float = 3.0,
-                     limit: int = 20) -> List[dict]:
+                     limit: int = 20) -> list[dict]:
         """FSRS 到期复习队列（园艺师调用）"""
         rows = self.db.conn.execute("""
             SELECT * FROM confidence WHERE target_type = ?

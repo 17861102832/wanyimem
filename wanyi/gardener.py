@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════╗
 ║          万忆中枢 v4 — 园艺师后台模块（gardener.py）            ║
@@ -21,9 +20,8 @@
 import json
 import os
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import List
 
 # 相似度阈值
 DUP_THRESHOLD = 0.85      # 冗余检测：内容相似度
@@ -51,7 +49,7 @@ class Gardener:
 
     # ── 检测器 1：矛盾检测 ────────────────────────────────────────
 
-    def detect_contradictions(self, content: str, exclude_id: str = None) -> List[dict]:
+    def detect_contradictions(self, content: str, exclude_id: str = None) -> list[dict]:
         """新内容与旧记忆的潜在矛盾检测（KektorDB contradiction detector）"""
         # 只对明确否定词触发（避免误报）
         has_negation = any(kw in content for kw in CONTRADICT_KEYWORDS)
@@ -114,7 +112,7 @@ class Gardener:
 
     # ── 检测器 2：冗余检测 ────────────────────────────────────────
 
-    def detect_redundancy(self, limit: int = 50) -> List[dict]:
+    def detect_redundancy(self, limit: int = 50) -> list[dict]:
         """高度相似记忆归并提示（不删除，只标记可合并）"""
         rows = self.db.conn.execute("""
             SELECT memory_id, content, layer, mem_type FROM memories
@@ -329,7 +327,7 @@ class Gardener:
         except Exception:
             pass
 
-    def _extract_entities(self, content: str) -> List[str]:
+    def _extract_entities(self, content: str) -> list[str]:
         """启发式实体提取（名词性短语，供矛盾检测匹配）"""
         # 中文实体：2-6 字连续中文片段（简单启发式）
         parts = re.findall(r"[\u4e00-\u9fff]{2,6}", content)

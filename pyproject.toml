@@ -45,3 +45,18 @@ packages = ["wanyi"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.ruff.lint]
+# 万忆中枢是"降级优先"系统：模型/向量不可用时静默降级是刻意设计，
+# 因此忽略盲 except（BLE001）、try-except-pass（S110/S112）。
+# 其余规则保持默认（E/F/I/UP/B/S 等）。
+ignore = [
+    "BLE001",  # 允许盲 except：静默降级是核心设计（模型不可用→返回None不崩溃）
+    "S110",    # 允许 try-except-pass：同上
+    "S112",    # 允许 try-except-continue：同上
+    "RUF013",  # 允许隐式 Optional：兼容旧式注解
+    "DTZ005",  # 本地单机工具，不强制时区参数
+    "C401",    # 集合推导风格
+    "RUF012",  # 允许可变类属性默认值
+    "PERF102", # 性能微优化提示，非必要
+]

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════╗
 ║        万 忆 中 枢  v3 — 项目级记忆适配器                        ║
@@ -15,23 +14,24 @@
 ║    - 进行中项目 = 钉住（永不衰减，保证一直在最前面）              ║
 ╚══════════════════════════════════════════════════════════════════╝
 """
-import os
-import sys
 import json
+import os
 import re
-from datetime import datetime
+import sys
 from pathlib import Path
-from typing import Optional, List, Dict
 
 sys.path.insert(0, os.path.dirname(__file__))
 from memory_core import (
-    WanYiCore, SESSION_ID, init_dirs,
-    LAYER_DAO, LAYER_FA, LAYER_SHU,
-    SPACE_PROJECT, SPACE_PERSONAL, SPACE_GLOBAL,
-    PRIVACY_PUBLIC, PRIVACY_INTERNAL, PRIVACY_CONFIDENTIAL, PRIVACY_TOP_SECRET,
+    LAYER_FA,
+    LAYER_SHU,
+    PRIVACY_INTERNAL,
+    SESSION_ID,
+    SPACE_GLOBAL,
+    SPACE_PROJECT,
+    WanYiCore,
+    init_dirs,
     now_iso,
 )
-
 
 PROJECT_CONTEXT_PATH = os.environ.get(
     "万忆中枢_PROJECT_CONTEXT",
@@ -309,7 +309,6 @@ def _build_project_graph(engine: WanYiCore, proj: dict) -> dict:
 
     # 关联记忆和项目节点
     # 术级记忆关联
-    shu_mem_id = f"术_{int(abs(hash(name + '_档案')) % 100000)}"  # 近似，实际通过name查
     try:
         row = engine.db.conn.execute(
             "SELECT memory_id FROM memories WHERE project = ? AND category = '项目档案'",

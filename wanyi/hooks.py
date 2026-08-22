@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════════╗
 ║        万 忆 中 枢  v3 — 五齿轮·四钩子 生命周期引擎              ║
@@ -24,27 +23,29 @@
 ║    4. 四钩子生命周期 = 一个都不能少                              ║
 ╚══════════════════════════════════════════════════════════════════╝
 """
-import os
-import sys
 import json
-import time
-import sqlite3
-import hashlib
+import os
 import re
+import sys
+import time
 from datetime import datetime
-from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any
 
 # 导入核心引擎（同目录）
 sys.path.insert(0, os.path.dirname(__file__))
 from memory_core import (
-    WanYiCore, MemoryDB,
-    SESSION_ID, init_dirs, STORE_DIR, DB_PATH,
-    LAYER_DAO, LAYER_FA, LAYER_SHU,
-    SPACE_PROJECT, SPACE_PERSONAL, SPACE_GLOBAL,
-    PRIVACY_PUBLIC, PRIVACY_INTERNAL, PRIVACY_CONFIDENTIAL, PRIVACY_TOP_SECRET,
-    MEMORY_TYPES, RETRIEVAL_WEIGHTS,
-    now_iso, tokenize_cn, gen_memory_id,
+    LAYER_DAO,
+    LAYER_FA,
+    LAYER_SHU,
+    MEMORY_TYPES,
+    PRIVACY_INTERNAL,
+    SESSION_ID,
+    SPACE_GLOBAL,
+    SPACE_PROJECT,
+    STORE_DIR,
+    WanYiCore,
+    init_dirs,
+    now_iso,
 )
 
 # ═══════════════════════════════════════════════════════════════════
@@ -73,7 +74,7 @@ _ENTITY_PATTERNS = {
     "project":   ["项目", "万忆", "中枢", "v1", "v2", "v3"],
 }
 
-def extract_entities(text: str) -> List[Dict[str, str]]:
+def extract_entities(text: str) -> list[dict[str, str]]:
     """
     从文本中启发式提取实体（用于自动构建知识图谱）
     返回 [{name, type, confidence}]
@@ -127,7 +128,7 @@ def extract_entities(text: str) -> List[Dict[str, str]]:
     return entities[:20]  # 最多取 20 个，避免图谱膨胀
 
 
-def extract_relations(text: str, entities: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+def extract_relations(text: str, entities: list[dict[str, str]]) -> list[dict[str, Any]]:
     """
     从文本中提取实体间的关系（启发式）
     返回 [{source, target, relation, weight}]
@@ -957,14 +958,14 @@ def _write_session_summary(engine: WanYiCore, total: int,
         pass
 
     md_lines = [
-        f"# 万忆中枢 · 会话摘要",
-        f"",
+        "# 万忆中枢 · 会话摘要",
+        "",
         f"- **会话ID**: {SESSION_ID}",
         f"- **时间**: {now_iso()}",
         f"- **新增记忆**: {total} 条",
-        f"",
-        f"## 按层级分布",
-        f"",
+        "",
+        "## 按层级分布",
+        "",
     ]
     for layer, cnt in by_layer.items():
         md_lines.append(f"- {layer}: {cnt} 条")
@@ -989,7 +990,7 @@ def _write_session_summary(engine: WanYiCore, total: int,
     md_lines += [
         "",
         "---",
-        f"*由万忆中枢 v3 自动生成 · 五齿轮四钩子引擎*",
+        "*由万忆中枢 v3 自动生成 · 五齿轮四钩子引擎*",
     ]
 
     try:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 v5.1 语义向量检索模块 — 护城河补强 #1（最大短板）
 - 本地中文向量模型 BAAI/bge-small-zh-v1.5（512维），HF镜像自动切换
@@ -8,8 +7,9 @@ v5.1 语义向量检索模块 — 护城河补强 #1（最大短板）
 """
 import os
 import sqlite3
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 
 # 中文向量模型名（可换更强模型）
 EMBED_MODEL_NAME = os.environ.get("万忆中枢_EMBED_MODEL", "BAAI/bge-small-zh-v1.5")

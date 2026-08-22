@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 万忆中枢·全量之心 (WanYi Memory Core)
 永不遗忘的全量记忆系统 — 事件溯源 + 过程记忆 + 语义向量 + 精排 + 图谱 + 元认知
@@ -13,18 +12,34 @@ import sys
 if os.path.dirname(__file__) not in sys.path:
     sys.path.insert(0, os.path.dirname(__file__))
 
-from .memory_core import WanYiCore, MemoryDB  # noqa: E402
-from .memory_core import (  # noqa: E402
-    LAYER_DAO, LAYER_FA, LAYER_SHU,
-    SPACE_GLOBAL, SPACE_PERSONAL, SPACE_PROJECT,
-    PRIVACY_PUBLIC, PRIVACY_INTERNAL, PRIVACY_CONFIDENTIAL, PRIVACY_TOP_SECRET,
+from .memory_core import (
+    LAYER_DAO,
+    LAYER_FA,
+    LAYER_SHU,
+    PRIVACY_CONFIDENTIAL,
+    PRIVACY_INTERNAL,
+    PRIVACY_PUBLIC,
+    PRIVACY_TOP_SECRET,
+    SPACE_GLOBAL,
+    SPACE_PERSONAL,
+    SPACE_PROJECT,
+    MemoryDB,
+    WanYiCore,
 )
 
 __version__ = "5.0.0"
 __all__ = [
-    "WanYiCore", "MemoryDB",
-    "LAYER_DAO", "LAYER_FA", "LAYER_SHU",
-    "SPACE_GLOBAL", "SPACE_PERSONAL", "SPACE_PROJECT",
-    "PRIVACY_PUBLIC", "PRIVACY_INTERNAL", "PRIVACY_CONFIDENTIAL", "PRIVACY_TOP_SECRET",
+    "LAYER_DAO",
+    "LAYER_FA",
+    "LAYER_SHU",
+    "PRIVACY_CONFIDENTIAL",
+    "PRIVACY_INTERNAL",
+    "PRIVACY_PUBLIC",
+    "PRIVACY_TOP_SECRET",
+    "SPACE_GLOBAL",
+    "SPACE_PERSONAL",
+    "SPACE_PROJECT",
+    "MemoryDB",
+    "WanYiCore",
     "__version__",
 ]

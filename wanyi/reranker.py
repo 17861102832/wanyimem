@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 v5.2 语义精排模块 — 护城河补强 #2（召回质量再上一台阶）
 - 本地中文重排模型 BAAI/bge-reranker-base（CrossEncoder），HF镜像自动切换
