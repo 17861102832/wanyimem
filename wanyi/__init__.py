@@ -27,7 +27,7 @@ from .memory_core import (
     WanYiCore,
 )
 
-__version__ = "5.0.0"
+__version__ = "1.0.0"
 __all__ = [
     "LAYER_DAO",
     "LAYER_FA",
