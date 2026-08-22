@@ -30,6 +30,12 @@ pip install "wanyimem[all]"     # 含向量 & 精排模型依赖
 
 需要 Python 3.10+。模型（向量 ~95MB、精排 ~1.1GB）首次使用时自动从 HuggingFace 下载；国内用户设置 `HF_ENDPOINT=https://hf-mirror.com` 走镜像。
 
+> PyPI 版本发布前，也可以直接从 GitHub 安装（代码与 PyPI 包一致）：
+>
+> ```bash
+> pip install "git+https://github.com/17861102832/wanyimem.git"
+> ```
+
 ## 快速开始（MCP）
 
 把以下配置加进你的 `mcp.json`（Claude Desktop / Cursor / Trae 等）：
