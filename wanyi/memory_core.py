@@ -25,6 +25,7 @@ import re
 import sqlite3
 import sys
 import time
+import traceback
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -1476,16 +1477,19 @@ class WanYiCore:
       - 万忆知识空白       元认知：知道自己不知道什么（语义向量检索随召回集成）
     """
 
-    def __init__(self):
+    def __init__(self, db_path=None, session_id=None):
         init_dirs()
-        self.db = MemoryDB(DB_PATH)
+        # 支持显式覆盖（测试/多实例注入），否则回退到模块级常量
+        self._db_path = Path(db_path) if db_path else DB_PATH
+        self._session_id = session_id or SESSION_ID
+        self.db = MemoryDB(self._db_path)
         # ═══ v4：挂载三大新模块 ═══
         from confidence import Confidence
         from gardener import Gardener
         from process_memory import ProcessMemory
-        self.process = ProcessMemory(self.db, SESSION_ID)
-        self.confidence = Confidence(self.db, SESSION_ID)
-        self.gardener = Gardener(self.db, SESSION_ID, OBSIDIAN_VAULT)
+        self.process = ProcessMemory(self.db, self._session_id)
+        self.confidence = Confidence(self.db, self._session_id)
+        self.gardener = Gardener(self.db, self._session_id, OBSIDIAN_VAULT)
         # 反向挂载：让 db 层也能访问（矛盾仲裁需要）
         self.db.confidence = self.confidence
         self.db.process = self.process
@@ -1493,7 +1497,7 @@ class WanYiCore:
         # ═══ v5.1：挂载语义向量索引（失败自动降级为关键词检索） ═══
         try:
             from vector_memory import VectorIndex
-            self.vector = VectorIndex(DB_PATH)
+            self.vector = VectorIndex(self._db_path)
             self.db.vector_store = self.vector
         except Exception:
             self.vector = None
@@ -2103,32 +2107,36 @@ class WanYiCore:
                  "layer": m["layer"], "confidence": m.get("confidence", 0)}
                 for m in recalled
             ]
-            # 搜错题本（process_memory里的failure）
-            import sqlite3
-            conn = sqlite3.connect(str(DB_PATH))
-            conn.row_factory = sqlite3.Row
-            cur = conn.cursor()
+            # 搜错题本（mistakes 表，Reflexion式反例库；统一用 self.db.conn 避免数据源不一致）
+            # 用决策文本命中的风险关键词去匹配错题 content，而非整句 LIKE（整句子串匹配不到同义句）
             try:
-                cur.execute(
-                    "SELECT * FROM process_memory WHERE outcome='failure' AND content LIKE ? ORDER BY rowid DESC LIMIT 3",
-                    (f"%{decision_text[:20]}%",)
-                )
-                for row in cur.fetchall():
+                risk_kws = [m["keyword"] for m in risk.get("matched_risks", [])]
+                kw_parts = [k for k in risk_kws if k] or [decision_text[:20]]
+                like_conds = " OR ".join("content LIKE ?" for _ in kw_parts)
+                params = [f"%{k}%" for k in kw_parts]
+                mistake_rows = self.db.conn.execute(
+                    f"SELECT * FROM mistakes WHERE ({like_conds}) AND status != 'learned' "
+                    f"ORDER BY pattern_count DESC, created_at DESC LIMIT 3",
+                    params
+                ).fetchall()
+                for row in mistake_rows:
                     relevant_mistakes.append(dict(row))
             except Exception:
-                pass
+                sys.stderr.write(f"[万忆中枢] 错题本查询失败: {traceback.format_exc()}\n")
+                sys.stderr.flush()
             try:
-                cur.execute(
-                    "SELECT * FROM experiences WHERE content LIKE ? ORDER BY rowid DESC LIMIT 3",
+                exp_rows = self.db.conn.execute(
+                    "SELECT * FROM experiences WHERE content LIKE ? ORDER BY source_count DESC, created_at DESC LIMIT 3",
                     (f"%{decision_text[:20]}%",)
-                )
-                for row in cur.fetchall():
+                ).fetchall()
+                for row in exp_rows:
                     relevant_experiences.append(dict(row))
             except Exception:
-                pass
-            conn.close()
+                sys.stderr.write(f"[万忆中枢] 经验库查询失败: {traceback.format_exc()}\n")
+                sys.stderr.flush()
         except Exception:
-            pass
+            sys.stderr.write(f"[万忆中枢] 决策检查召回相关记忆失败: {traceback.format_exc()}\n")
+            sys.stderr.flush()
 
         # 4) 决策结论
         verdict = "PASS"

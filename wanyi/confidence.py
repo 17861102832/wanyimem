@@ -190,11 +190,17 @@ class Confidence:
 
     def needs_review(self, target_type: str, min_age_days: float = 3.0,
                      limit: int = 20) -> list[dict]:
-        """FSRS 到期复习队列（园艺师调用）"""
+        """FSRS 到期复习队列（园艺师调用）：返回超过 min_age_days 未复习的记录，最旧的优先。
+        min_age_days = 距 last_updated 至少多少天才算"到期需复习"。
+        """
         rows = self.db.conn.execute("""
-            SELECT * FROM confidence WHERE target_type = ?
-            ORDER BY last_updated ASC LIMIT ?
-        """, (target_type, limit)).fetchall()
+            SELECT * FROM confidence
+            WHERE target_type = ?
+              AND confidence <= 0.7
+              AND (julianday('now') - julianday(last_updated)) >= ?
+            ORDER BY last_updated ASC
+            LIMIT ?
+        """, (target_type, min_age_days, limit)).fetchall()
         return [dict(r) for r in rows]
 
     def self_check(self) -> dict:
