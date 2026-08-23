@@ -814,7 +814,12 @@ class MemoryDB:
         # 合并两通道结果（RRF 融合）
         all_ids = set(fts_results.keys()) | set(kw_results.keys())
         if not all_ids:
-            # 没有匹配时按时间倒序返回一些最近记忆
+            # 无任何关键词命中。
+            # v1.1：区分「空查询」与「无匹配的非空查询」——
+            #   - 空查询（如 hook_load 道/法级注入）→ 按时间倒序返回最近记忆（_fallback，供注入）
+            #   - 非空查询却无匹配 → 诚实返回空，触发知识空白（绝不硬凑答案）
+            if query.strip():
+                return []
             extra_where = []
             extra_params = []
             if layer and layer != "all":
@@ -1661,7 +1666,7 @@ class WanYiCore:
             pass
 
         # ═══ v5.1 元认知：知识空白检测（v5.4改进：兜底记忆不算真实命中） ═══
-        # 无真实命中（所有通道都空，只剩兜底记忆）或最高分过低 → 记录知识空白
+        # 无真实命中（所有通道都空）或最高分过低 → 记录知识空白
         gap = None
         try:
             top_score = results[0].get("_score", 0) if results else 0
@@ -3418,7 +3423,7 @@ def handle_request(req: dict) -> dict:
                     },
                     "serverInfo": {
                         "name": "万忆中枢·全量之心",
-                        "version": "1.0.1",
+                        "version": "1.0.2",
                         "description": "全量记忆中枢 v5.0「六护城河+向量+精排+图谱+时序+元认知」：事件溯源 + 过程记忆 + 错题本 + 经验库 + 认知置信度决策拦截 + 反事实平行分支 + 跨域类比迁移 + 决策轨迹回放 + 主动简报/体检/周复盘 + 语义向量混合召回 + reranker精排 + 记忆关系图谱 + 时序衰减 + 知识空白元认知，23个MCP工具全局可用",
                     },
                 },

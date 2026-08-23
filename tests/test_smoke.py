@@ -39,9 +39,14 @@ def test_record_and_recall(engine):
 
 
 def test_knowledge_gap(engine):
-    # 完全无关查询 → 应记录知识空白（兜底记忆不算真实命中）
+    """全然无关的查询不得硬凑结果（真实命中为空则诚实记录知识空白，绝不硬凑答案）"""
+    engine.tool_record_memory(content="止损纪律：亏损超过8%必须无条件卖出", layer="法", mem_type="principle")
+    # 完全无关查询 → 应返回 0 条真实命中 + 触发知识空白（v1.1：修复前会返回 _fallback 垃圾）
     resp = engine.tool_recall_memory("量子计算的原理是什么", limit=5)
     assert "knowledge_gap" in resp, "weak recall should record knowledge-gap"
+    # 兜底记忆不算真实命中；无匹配的非空查询不应返回多条假关联结果
+    real_hits = [m for m in resp.get("memories", []) if not m.get("_fallback")]
+    assert not real_hits, "无关查询不应有真实命中"
     stats = engine.tool_knowledge_gap(action="stats")
     assert "元认知自检" in str(stats) or stats.get("status") == "ok"
 
