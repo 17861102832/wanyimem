@@ -113,6 +113,8 @@ for m in resp["memories"]:
 | Growth | mistake book, experience crystallization, overnight consolidation, evolution queries |
 | Privacy | fully local, zero telemetry, no cloud dependency |
 
+**Public benchmark (LongMemEval)** — session-level retrieval, full results in [`benchmark/RESULTS.md`](benchmark/RESULTS.md). Core (BM25 + graph, no models) reaches **Recall@5 = 0.960 / MRR = 0.907** on `s_cleaned` (with ~40 distractor sessions). Reproduce via `python benchmark/longmemeval_run.py`.
+
 Benchmark — reproducible mini LongMemEval (14 keyword-mismatched cross-session fact queries, run via `python benchmark/recall_benchmark.py`):
 
 | Version | Recall@5 | MRR |

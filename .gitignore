@@ -72,3 +72,6 @@ Thumbs.db
 desktop.ini
 *.log
 *.tmp
+
+# ── 基准下载数据：太大，不纳入 Git（260MB 级，临时下载物）
+benchmark/_longmemeval_data/
