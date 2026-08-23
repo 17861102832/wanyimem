@@ -41,6 +41,18 @@ pip install "wanyimem[all]"     # 含向量 & 精排模型 + sqlite-vec ANN（�
 > pip install "git+https://github.com/17861102832/wanyimem.git"
 > ```
 
+## CLI 与自动化
+
+除 MCP 服务器外，`pip install wanyimem` 后自带两个控制台命令：
+
+```bash
+wanyi-export --db memory.db --out memory.md   # 只读 Markdown 镜像：可读、可 diff、可版本化
+wanyi-auto --db memory.db                     # 一轮护城河自动巡检：反事实诚实自动结算 + 自动巩固 + 跨域类比巡检
+wanyi-auto --db memory.db --loop 3600         # 周期调度器（后台守护，默认关闭）
+```
+
+> `wanyi-export` 把事件溯源库渲染成人类可读、可版本化的 Markdown 镜像（按 道/法/术 分组，含错题本/经验库/知识空白/反事实分支/跨域模式）。`wanyi-auto` 把护城河自动化：到期反事实分支**诚实**结算（标记 `expired` 而非编造赢家）、睡眠+深巩固、并给出最值得回想的跨域模式。
+
 ## 快速开始（MCP）
 
 把以下配置加进你的 `mcp.json`（Claude Desktop / Cursor / Trae 等）：

@@ -58,6 +58,18 @@ Requires Python 3.10+. Models (embedding ~95MB, reranker ~1.1GB) are downloaded 
 > pip install "git+https://github.com/17861102832/wanyimem.git"
 > ```
 
+## CLI & Automation
+
+Beyond the MCP server, wanyimem ships two console commands after `pip install wanyimem`:
+
+```bash
+wanyi-export --db memory.db --out memory.md   # readable, diff-able Markdown mirror of all memory (read-only)
+wanyi-auto --db memory.db                     # one AutoMoat pass: honest counterfactual auto-settlement + consolidation + analog patrol
+wanyi-auto --db memory.db --loop 3600         # periodic scheduler (daemon background; off by default)
+```
+
+> `wanyi-export` renders the event-sourced store into a human-readable, version-controllable Markdown mirror (grouped by 道/法/术, plus mistakes / experiences / knowledge-gaps / counterfactual branches / cross-domain patterns). `wanyi-auto` automates the guardrails: it honestly settles overdue counterfactual branches (marking them `expired` rather than fabricating a winner), runs sleep + deep consolidation, and surfaces the cross-domain analog patterns most worth recalling.
+
 ## Quick Start (MCP)
 
 Add to your `mcp.json` (Claude Desktop, Cursor, Trae, etc.):

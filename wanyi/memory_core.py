@@ -2328,7 +2328,7 @@ class WanYiCore:
                 (limit,)
             )
             rows = [dict(r) for r in cur.fetchall()]
-            stats = {"fact_won": 0, "counter_won": 0, "neutral": 0}
+            stats = {"fact_won": 0, "counter_won": 0, "neutral": 0, "expired": 0}
             for r in rows:
                 v = r.get("verdict", "")
                 if v in stats:

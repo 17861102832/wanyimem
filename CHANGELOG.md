@@ -2,6 +2,19 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 与 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [1.0.5] - 2026-08-24
+
+### Added（只读 Markdown 镜像 + 护城河全自动）
+
+- **只读 Markdown 镜像导出**（护城河 #6）：新增 `wanyi/mirror.py` + `wanyi-export` 命令。把事件溯源库渲染成**人类可读、可 diff、可版本化**的 Markdown —— 按 道/法/术 分组，含错题本/经验库/知识空白/反事实分支/跨域模式，只读不写库。用法：`wanyi-export --db memory.db --out memory.md`（或 `python -m wanyi.mirror`）。
+- **护城河全自动（AutoMoat）**（护城河 #5）：新增 `wanyi/auto_moat.py` + `wanyi-auto` 命令。
+  - **反事实诚实自动结算**：settlement_date 到期仍 open 的分支，若有可推实测结果则自动结算；否则**诚实标记 `expired`**（绝不编造赢家，符合召回诚实/元认知理念）。
+  - **自动巩固**：睡眠巩固（衰减/增强/合并/归档）+ 园艺师深巩固（矛盾仲裁/技能结晶/每日档案）。
+  - **跨域类比巡检**：按命中/置信列出最该被提醒的跨域模式。
+  - **调度器**：`wanyi-auto --db memory.db --loop 3600` 后台周期巡检；或 CLI 跑一轮。默认不自动起动，避免把 MCP 服务器变成常驻守护。
+- **CLI**：新增 `wanyi-export` 与 `wanyi-auto` 两个 console 入口（`pip install wanyimem` 后可用）。
+- **测试**：新增 `tests/test_mirror.py`（3 用例）与 `tests/test_auto_moat.py`（3 用例）；全部测试通过。
+
 ## [1.0.4] - 2026-08-24
 
 ### Added（向量大规模检索提速 — sqlite-vec 轻量 ANN）

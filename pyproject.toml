@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wanyimem"
-version = "1.0.4"
-description = "永不遗忘的全量记忆系统 — 事件溯源 + 过程记忆 + 语义向量检索 + sqlite-vec ANN + reranker精排 + 记忆图谱 + 元认知知识空白，23个MCP工具"
+version = "1.0.5"
+description = "永不遗忘的全量记忆系统 — 事件溯源 + 过程记忆 + 语义向量检索 + sqlite-vec ANN + reranker精排 + 记忆图谱 + 元认知知识空白 + 只读Markdown镜像 + 护城河全自动，23个MCP工具"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
@@ -34,6 +34,8 @@ test = ["pytest>=7.0"]
 
 [project.scripts]
 wanyi = "wanyi.memory_core:main"
+wanyi-export = "wanyi.mirror:main"
+wanyi-auto = "wanyi.auto_moat:main"
 
 [project.urls]
 Homepage = "https://github.com/17861102832/wanyimem"
@@ -57,6 +59,7 @@ ignore = [
     "S112",    # 允许 try-except-continue：同上
     "RUF013",  # 允许隐式 Optional：兼容旧式注解
     "DTZ005",  # 本地单机工具，不强制时区参数
+    "DTZ011",  # 同上：本地单机工具，统计/调度用本地日期即可
     "C401",    # 集合推导风格
     "RUF012",  # 允许可变类属性默认值
     "PERF102", # 性能微优化提示，非必要
