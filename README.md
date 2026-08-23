@@ -8,6 +8,9 @@
 ![MCP](https://img.shields.io/badge/MCP-server-purple)
 [![CI](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml/badge.svg)](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/wanyimem)](https://pypi.org/project/wanyimem/)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-00d4aa)](https://cdn.jsdelivr.net/gh/17861102832/wanyimem@main/docs/demo.html)
+
+> 🎬 **Live Demo**: [交互式演示页](https://cdn.jsdelivr.net/gh/17861102832/wanyimem@main/docs/demo.html) · [源码 `docs/demo.html`](https://github.com/17861102832/wanyimem/blob/main/docs/demo.html)
 
 ---
 
