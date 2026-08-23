@@ -38,7 +38,7 @@ LLM agents forget. Every chat window is amnesia: preferences, lessons, and hard-
 WanYi Memory Core is a **local-first, full-quantity, self-evolving memory system**:
 
 - **Event sourcing** — an append-only WAL is the single source of truth. Nothing is ever deleted; decay only affects retrieval ranking.
-- **Semantic recall** — hybrid retrieval: BM25 keywords + local Chinese embedding (BAAI/bge-small-zh-v1.5) + reranker (BAAI/bge-reranker-base) + knowledge-graph expansion + explicit time decay.
+- **Semantic recall** — hybrid retrieval: BM25 keywords + local Chinese embedding (BAAI/bge-small-zh-v1.5) + reranker (BAAI/bge-reranker-base) + knowledge-graph expansion + explicit time decay. Vector search is **hybrid** itself: exact cosine below `ANN_MIN_COUNT`, and a `sqlite-vec` ANN pre-filter + exact re-rank above it — so it stays fast at scale without sacrificing recall quality.
 - **Metacognition** — when recall is weak, the system admits it and records a knowledge-gap instead of hallucinating an answer.
 - **Decision guardrails** — high-risk actions (all-in, revenge-trading, force-push, rm -rf) trigger confidence-based blocking with counterfactual branches: you see what would have happened *if you had listened*.
 - **Zero-participation evolution** — no need to say "remember this"; the system decides what to store, consolidates overnight, and surfaces weekly trajectory reviews.
@@ -47,7 +47,7 @@ WanYi Memory Core is a **local-first, full-quantity, self-evolving memory system
 
 ```bash
 pip install wanyimem            # core
-pip install "wanyimem[all]"     # + vector & reranker models deps
+pip install "wanyimem[all]"     # + vector/reranker models + sqlite-vec ANN (use [ann] for ANN only)
 ```
 
 Requires Python 3.10+. Models (embedding ~95MB, reranker ~1.1GB) are downloaded on first use from HuggingFace; set `HF_ENDPOINT=https://hf-mirror.com` if you are in mainland China.

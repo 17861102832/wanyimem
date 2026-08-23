@@ -21,7 +21,7 @@
 万忆中枢是**本地优先、全量存储、自动进化**的记忆系统：
 
 - **事件溯源** — append-only WAL 是唯一真相源，永不删除；衰减只影响检索排序
-- **语义召回** — BM25 关键词 + 本地中文向量模型（BAAI/bge-small-zh-v1.5）+ reranker 精排（BAAI/bge-reranker-base）+ 知识图谱扩展 + 显性时序衰减，四通道混合
+- **语义召回** — BM25 关键词 + 本地中文向量模型（BAAI/bge-small-zh-v1.5）+ reranker 精排（BAAI/bge-reranker-base）+ 知识图谱扩展 + 显性时序衰减，四通道混合。其中向量检索本身也是**混合**的：低于 `ANN_MIN_COUNT` 走全表精确余弦，超过则用 `sqlite-vec` 最近邻**预筛**+精确重排——规模化下既提速又不牺牲召回质量。
 - **元认知** — 召回结果弱时系统诚实承认并记录知识空白，绝不硬凑答案
 - **决策护栏** — 高风险动作（全仓梭哈/追涨/不止损/删库/强推）触发置信度拦截 + 自动开立反事实分支：让你亲眼看见"如果当时听劝会怎样"
 - **零参与进化** — 不用喊"记住这个"，系统自动判断该存什么、夜间巩固、每周轨迹回放
@@ -30,7 +30,7 @@
 
 ```bash
 pip install wanyimem            # 核心
-pip install "wanyimem[all]"     # 含向量 & 精排模型依赖
+pip install "wanyimem[all]"     # 含向量 & 精排模型 + sqlite-vec ANN（仅要 ANN 用 [ann]）
 ```
 
 需要 Python 3.10+。模型（向量 ~95MB、精排 ~1.1GB）首次使用时自动从 HuggingFace 下载；国内用户设置 `HF_ENDPOINT=https://hf-mirror.com` 走镜像。

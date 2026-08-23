@@ -2,6 +2,20 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 与 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [1.0.4] - 2026-08-24
+
+### Added（向量大规模检索提速 — sqlite-vec 轻量 ANN）
+
+- **混合检索策略**：`vector_memory.py` 升级为「small 精确 / large ANN」双路径。
+  - 记忆规模 < `ANN_MIN_COUNT`（默认 2000）→ 全表精确余弦（正确性优先，量级小够用）。
+  - 规模 ≥ 阈值且 `sqlite-vec` 可用 → `vec0` 近似最近邻**预筛**（`k = limit*3+5`）+ 用完整 embedding **精确重排**（既提速又保准）。
+  - `sqlite-vec` 未安装 → 自动回退纯精确，**完全向后兼容**。
+- **可选依赖**：新增 `wanyimem[ann]`（`sqlite-vec>=0.1.6`），并并入 `wanyimem[all]`。
+- **正确性保障**：`memory_embeddings` 仍是权威真值表（精确通道始终可用）；vec0 只是影子索引。换模型/维度变化时自动重建 vec0 表并从权威表重灌当前维度向量，维度不匹配的旧向量不进 ANN（精确不受影响）。
+- **测试**：新增 `tests/test_vector_ann.py`（3 个用例，伪向量 monkeypatch，无需模型/网络；sqlite-vec 缺失时仅跳过 ANN 断言），现有 13 个冒烟用例全部通过（合计 16 passed）。
+
+> 回应社区对「向量全表载入内存暴力检索」的顾虑：wanyimem 默认小规模用精确、大规模用 ANN 预筛+精确重排，兼顾召回质量与扩展性。
+
 ## [1.0.3] - 2026-08-23
 
 ### Fixed（记忆图谱"记录→查询"恒为空 — 实弹功能验证发现）

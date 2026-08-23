@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wanyimem"
-version = "1.0.3"
-description = "永不遗忘的全量记忆系统 — 事件溯源 + 过程记忆 + 语义向量检索 + reranker精排 + 记忆图谱 + 元认知知识空白，23个MCP工具"
+version = "1.0.4"
+description = "永不遗忘的全量记忆系统 — 事件溯源 + 过程记忆 + 语义向量检索 + sqlite-vec ANN + reranker精排 + 记忆图谱 + 元认知知识空白，23个MCP工具"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
@@ -28,7 +28,8 @@ dependencies = [
 [project.optional-dependencies]
 vector = ["sentence-transformers>=2.7"]
 rerank = ["sentence-transformers>=2.7"]
-all = ["sentence-transformers>=2.7"]
+ann = ["sqlite-vec>=0.1.6"]
+all = ["sentence-transformers>=2.7", "sqlite-vec>=0.1.6"]
 test = ["pytest>=7.0"]
 
 [project.scripts]
