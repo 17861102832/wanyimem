@@ -85,8 +85,10 @@ def test_graph_search_after_record(engine):
 
 def test_time_fields(engine):
     engine.tool_record_memory(content="2026年5月基金大跌死扛不止损亏了18%", layer="法")
-    resp = engine.tool_recall_memory("认赔离场到底对不对", limit=5)
-    assert resp["results_count"] >= 1
+    # CI 只装 numpy（纯 BM25，无向量模型）。查询必须与记忆有真实关键词重叠才能命中，
+    # 否则会受 v1.1 召回诚实性影响（无重叠非空查询不再 fallback，返回 0）。
+    resp = engine.tool_recall_memory("基金大跌死扛不止损", limit=5)
+    assert resp["results_count"] >= 1, f"纯BM25下应命中，实际 {resp['results_count']}"
     m = resp["memories"][0]
     assert "_age_days" in m and "_time_decay" in m and "_stale" in m
 
