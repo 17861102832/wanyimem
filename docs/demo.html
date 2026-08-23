@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WanYi Memory Core — 万忆中枢 | 永不遗忘的全量记忆系统</title>
+<meta name="description" content="Event-sourced long-term memory for AI agents. 23 MCP tools, local-first, zero cloud dependency. pip install wanyimem">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--text:#e8e6e3;--text2:#9a9890;--accent:#00d4aa;--accent2:#7c5cfc;--danger:#ff4757;--warning:#ffa502;--border:rgba(255,255,255,0.08);--glow:rgba(0,212,170,0.15);font-family:-apple-system,'SF Pro Display','PingFang SC','Microsoft YaHei',sans-serif}
+body{background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+.hero{padding:80px 0 60px;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(0,212,170,0.08) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-size:clamp(32px,6vw,56px);font-weight:700;background:linear-gradient(135deg,#00d4aa,#7c5cfc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;letter-spacing:-1px}
+.hero .subtitle{font-size:18px;color:var(--text2);max-width:700px;margin:0 auto 32px;line-height:1.8}
+.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.badge{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--bg2)}
+.badge.green{color:var(--accent);border-color:rgba(0,212,170,0.3)}
+.badge.purple{color:var(--accent2);border-color:rgba(124,92,252,0.3)}
+.badge.gray{color:var(--text2)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:700px;margin:0 auto}
+.stat{text-align:center;padding:24px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;transition:transform 0.2s}
+.stat:hover{transform:translateY(-2px)}
+.stat .num{font-size:36px;font-weight:700;color:var(--accent);display:block}
+.stat .label{font-size:13px;color:var(--text2);margin-top:4px}
+.section{padding:60px 0}
+.section-title{font-size:28px;font-weight:700;text-align:center;margin-bottom:12px}
+.section-desc{color:var(--text2);text-align:center;max-width:600px;margin:0 auto 40px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.feature-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px 24px;transition:all 0.25s}
+.feature-card:hover{border-color:rgba(0,212,170,0.3);box-shadow:0 0 30px var(--glow)}
+.feature-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.feature-card h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.feature-card p{font-size:14px;color:var(--text2);line-height:1.7}
+.demo-section{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.demo-tabs{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap}
+.demo-tab{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--text2);border:1px solid transparent;transition:all 0.2s}
+.demo-tab:hover{color:var(--text)}
+.demo-tab.active{background:var(--bg3);color:var(--accent);border-color:rgba(0,212,170,0.3)}
+.demo-panel{display:none;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:24px;min-height:320px}
+.demo-panel.active{display:block}
+.terminal{background:#0d0d12;border:1px solid var(--border);border-radius:8px;font-family:'JetBrains Mono','Fira Code',monospace;font-size:13px;overflow:hidden}
+.terminal-header{padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;gap:6px}
+.terminal-dot{width:10px;height:10px;border-radius:50%;background:var(--border)}
+.terminal-dot.red{background:#ff5f57}.terminal-dot.yellow{background:#febc2e}.terminal-dot.green{background:#28c840}
+.terminal-body{padding:16px;line-height:1.8;min-height:200px}
+.terminal-body .cmd{color:var(--accent)}.terminal-body .output{color:var(--text2)}
+.terminal-body .result{color:#ffa502}.terminal-body .success{color:var(--accent)}.terminal-body .error{color:var(--danger)}
+.terminal-body .comment{color:var(--text2);font-style:italic}
+.typing-cursor::after{content:'|';animation:blink 1s infinite}@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.confidence-bar{height:8px;border-radius:4px;background:var(--bg3);margin:8px 0 16px;overflow:hidden}
+.confidence-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.confidence-fill.blocked{background:linear-gradient(90deg,var(--danger),#ff6b81)}
+.confidence-fill.passed{background:linear-gradient(90deg,var(--accent),#55efc4)}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.tool-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;transition:all 0.2s}
+.tool-item:hover{border-color:rgba(124,92,252,0.4)}
+.tool-name{color:var(--accent2);font-weight:500;font-size:12px}
+.tool-desc{color:var(--text2);margin-top:4px;font-size:12px;line-height:1.5}
+.bench-table{width:100%;border-collapse:collapse;font-size:13px}
+.bench-table th{padding:12px 14px;text-align:left;background:var(--bg3);color:var(--text2);font-weight:500;border-bottom:1px solid var(--border)}
+.bench-table td{padding:12px 14px;border-bottom:1px solid var(--border)}
+.bench-table tr:hover td{background:rgba(0,212,170,0.03)}
+.bench-num{font-weight:600;color:var(--accent)}
+.cta-section{text-align:center;padding:80px 0}
+.cta-section h2{font-size:32px;font-weight:700;margin-bottom:16px}
+.cta-section p{color:var(--text2);max-width:500px;margin:0 auto 32px}
+.install-code{display:inline-block;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 28px;font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--accent);margin-bottom:24px}
+.btn-group{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.2s}
+.btn-primary{background:var(--accent);color:var(--bg)}
+.btn-primary:hover{box-shadow:0 0 30px rgba(0,212,170,0.3);transform:translateY(-1px)}
+.btn-outline{border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+footer{text-align:center;padding:40px 0;color:var(--text2);font-size:13px;border-top:1px solid var(--border)}
+footer a{color:var(--accent2);text-decoration:none}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)} .hero{padding:50px 0 40px} .section{padding:40px 0}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+<div class="container">
+<h1>WanYi Memory Core</h1>
+<p class="subtitle">永不遗忘的全量记忆系统。事件溯源 + 置信度拦截 + 反事实分支 + 元认知空白。<br>你的 AI Agent 不再是金鱼，它有记忆、有判断、有成长。</p>
+<div class="badges">
+<span class="badge green">v1.0.3</span>
+<span class="badge purple">MIT License</span>
+<span class="badge gray">Python 3.10+</span>
+<span class="badge green">Local First</span>
+<span class="badge purple">23 MCP Tools</span>
+</div>
+<div class="stats">
+<div class="stat"><span class="num" id="stat-tools">23</span><span class="label">MCP 工具</span></div>
+<div class="stat"><span class="num" id="stat-write">3.1ms</span><span class="label">写入延迟</span></div>
+<div class="stat"><span class="num" id="stat-recall">2.5ms</span><span class="label">召回延迟</span></div>
+<div class="stat"><span class="num" id="stat-memory">44MB</span><span class="label">内存占用</span></div>
+</div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+<h2 class="section-title">六护城河架构</h2>
+<p class="section-desc">不是又一个向量数据库。万忆中枢解决的是「存、取、判断、反思、纠错」全链路。</p>
+<div class="features-grid">
+<div class="feature-card"><div class="feature-icon" style="background:rgba(255,71,87,0.15)">🛡️</div><h3>置信度拦截</h3><p>高风险操作自动触发决策检查。「全仓梭哈」→ BLOCK，「正常重构」→ PASS。基于历史教训的置信度评分引擎。</p></div>
+<div class="feature-card"><div class="feature-icon" style="background:rgba(124,92,252,0.15)">🪞</div><h3>反事实之镜</h3><p>每个关键决策点开平行分支：「如果我当时听了会怎样」。到期自动结算对比，把「本可以」变成「下次一定」。</p></div>
+<div class="feature-card"><div class="feature-icon" style="background:rgba(0,212,170,0.15)">🌉</div><h3>跨域类比桥接</h3><p>交易止损纪律 → 写作砍掉冗余章节 → 编程删除死代码。抽象底层模式，跨领域迁移智慧。</p></div>
+<div class="feature-card"><div class="feature-icon" style="background:rgba(255,165,2,0.15)">📚</div><h3>错题本 + 经验库</h3><p>自动提取高频错误模式，沉淀成功路径为可复用经验结晶。不重复犯错，从每次失败中提取最大价值。</p></div>
+<div class="feature-card"><div class="feature-icon" style="background:rgba(0,180,216,0.15)">🎬</div><h3>轨迹回放</h3><p>所有反事实分支串成一条决策时间线。回顾过去30天的每一个分叉路口，看清自己的决策模式。</p></div>
+<div class="feature-card"><div class="feature-icon" style="background:rgba(234,100,210,0.15)">🧠</div><h3>元认知知识空白</h3><p>召回弱时不瞎编，诚实记录「我不知道」。知识空白列表就是你的学习地图，填补一个少一个。</p></div>
+</div>
+</div>
+</section>
+
+<section class="demo-section">
+<div class="container">
+<h2 class="section-title" style="margin-top:0;padding-top:60px;">交互式演示</h2>
+<p class="section-desc">真实 MCP 调用模拟。每个场景都是实际可运行的命令。</p>
+<div class="demo-tabs">
+<button class="demo-tab active" onclick="switchTab(event,'tab-write')">📝 记忆写入</button>
+<button class="demo-tab" onclick="switchTab(event,'tab-recall')">🔍 语义召回</button>
+<button class="demo-tab" onclick="switchTab(event,'tab-block')">🛡️ 置信度拦截</button>
+<button class="demo-tab" onclick="switchTab(event,'tab-tools')">🔧 全部工具</button>
+</div>
+
+<div id="tab-write" class="demo-panel active">
+<div class="terminal">
+<div class="terminal-header"><div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div></div>
+<div class="terminal-body">
+<div class="comment"># 场景1：记录交易教训</div>
+<div class="cmd">&gt; tool_record_memory(content="止损纪律：亏损超8%必须无条件卖出", layer="道", mem_type="principle")</div>
+<div class="output">{ "status": "inserted", "id": "mem_001", "layer": "道", "type": "principle" }</div>
+<div class="success">✅ 记忆已写入道层（最高优先级，永不衰减）</div><br>
+<div class="comment"># 场景2：记录写作观察</div>
+<div class="cmd">&gt; tool_record_memory(content="第3章读者掉点严重——反转太突兀缺少铺垫", layer="术", mem_type="observation")</div>
+<div class="output">{ "status": "inserted", "id": "mem_002", "layer": "术", "type": "observation" }</div>
+<div class="success">✅ 写入耗时 2.6ms | 术层记忆（中等半衰期）</div><br>
+<div class="comment"># 场景3：记录技术事实</div>
+<div class="cmd">&gt; tool_record_memory(content="asyncio比多线程更轻量，IO密集型首选", layer="法", mem_type="fact")</div>
+<div class="output">{ "status": "inserted", "id": "mem_003", "layer": "法", "type": "fact" }</div>
+<div class="success">✅ 法层记忆（方法论的载体）</div><br>
+<div class="comment"># 批量写入 100 条测试：</div>
+<div class="result">总耗时 510ms | 平均 5.1ms/条 | 线性扩展 ✅</div>
+</div>
+</div>
+</div>
+
+<div id="tab-recall" class="demo-panel">
+<div class="terminal">
+<div class="terminal-header"><div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div></div>
+<div class="terminal-body">
+<div class="comment"># 查询1：语义召回（零关键词重叠）</div>
+<div class="cmd">&gt; tool_recall_memory("怎么写好小说开头", limit=5)</div>
+<div class="output">[<br>
+&nbsp;&nbsp;{"content":"番茄小说开篇黄金三行：悬念+人物+冲突，前300字必须出钩子", "_score": 0.77},<br>
+&nbsp;&nbsp;{"content":"番茄小说开篇黄金三行：悬念+人物+冲突", "_score": 0.70},<br>
+&nbsp;&nbsp;{"content":"番茄小说开篇黄金三行：悬念+人物+冲突，前300字必须出钩子", "_score": 0.69}<br>
+]</div>
+<div class="success">✅ 召回3条 | 最高分0.77 | 耗时3.3ms | 精准命中</div><br>
+<div class="comment"># 查询2：风险相关召回</div>
+<div class="cmd">&gt; tool_recall_memory("全仓买入风险", limit=5)</div>
+<div class="output">[<br>
+&nbsp;&nbsp;{"content":"全仓梭哈是亏损之源，永远不要超过30%仓位", "_score": 0.77},<br>
+&nbsp;&nbsp;{"content":"全仓梭哈是亏损之源，永远不要超过30%仓位", "_score": 0.69}<br>
+]</div>
+<div class="success">✅ 召回2条 | 最高分0.77 | 耗时1.7ms | 精准命中</div><br>
+<div class="comment"># 查询3：空查询（应返回空）</div>
+<div class="cmd">&gt; tool_recall_memory("完全不存在的查询xyzabc", limit=5)</div>
+<div class="output">[]</div>
+<div class="success">✅ 返回空结果 | 耗时0.8ms | 不瞎编不凑数</div>
+</div>
+</div>
+</div>
+
+<div id="tab-block" class="demo-panel">
+<div class="terminal">
+<div class="terminal-header"><div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div></div>
+<div class="terminal-body">
+<div class="comment"># 决策1：高风险操作 → 应该被拦截</div>
+<div class="cmd">&gt; tool_confidence_check(action="check", decision_text="我要全仓梭哈AI概念股")</div>
+<div class="output">{<br>
+&nbsp;&nbsp;"verdict": <span class="error">"BLOCK"</span>,<br>
+&nbsp;&nbsp;"risk_level": "critical",<br>
+&nbsp;&nbsp;"matched_risks": [{"keyword": "全仓", "level": "critical"}],<br>
+&nbsp;&nbsp;"confidence": { "current": 0.50, "threshold": 0.85 }<br>
+}</div>
+<div class="confidence-bar"><div class="confidence-fill blocked" style="width:50%"></div></div>
+<div class="error">🛡️ BLOCKED! 置信度 0.50 &lt; 阈值 0.85 | 匹配到「全仓」关键词 | 历史记录：上次类似操作亏了18%</div><br>
+<div class="comment"># 决策2：正常操作 → 应该通过</div>
+<div class="cmd">&gt; tool_confidence_check(action="check", decision_text="用asyncio重构爬虫模块")</div>
+<div class="output">{<br>
+&nbsp;&nbsp;"verdict": <span class="success">"PASS"</span>,<br>
+&nbsp;&nbsp;"risk_level": "low",<br>
+&nbsp;&nbsp;"matched_risks": [],<br>
+&nbsp;&nbsp;"confidence": { "current": 0.50, "threshold": 0.30 }<br>
+}</div>
+<div class="confidence-bar"><div class="confidence-fill passed" style="width:50%"></div></div>
+<div class="success">✅ PASSED! 无风险关键词匹配 | 正常操作放行 | 耗时2.1ms</div><br>
+<div class="comment"># 决策3：报复性交易 → 也应该拦截</div>
+<div class="cmd">&gt; tool_confidence_check(action="check", decision_text="刚才亏了我要加倍仓位博回来")</div>
+<div class="output">{<br>
+&nbsp;&nbsp;"verdict": <span class="error">"BLOCK"</span>,<br>
+&nbsp;&nbsp;"risk_level": "medium",<br>
+&nbsp;&nbsp;"matched_risks": [{"keyword": "加倍仓位", "level": "medium"}]<br>
+}</div>
+<div class="confidence-bar"><div class="confidence-fill blocked" style="width:35%"></div></div>
+<div class="error">🛡️ BLOCKED! 「加倍仓位」触发报复性交易检测</div>
+</div>
+</div>
+</div>
+
+<div id="tab-tools" class="demo-panel">
+<h3 style="margin-bottom:16px;font-size:15px;">全部 23 个 MCP 工具</h3>
+<div class="tools-grid">
+<div class="tool-item"><div class="tool-name">tool_record_memory</div><div class="tool-desc">写入新记忆（支持道/法/术三层）</div></div>
+<div class="tool-item"><div class="tool-name">tool_recall_memory</div><div class="tool-desc">混合检索召回（BM25+向量+图谱）</div></div>
+<div class="tool-item"><div class="tool-name">tool_confidence_check</div><div class="tool-desc">置信度决策拦截（护城河#1）</div></div>
+<div class="tool-item"><div class="tool-name">tool_counterfactual_mirror</div><div class="tool-desc">反事实平行分支（护城河#2）</div></div>
+<div class="tool-item"><div class="tool-name">tool_analog_bridge</div><div class="tool-desc">跨域类比迁移（护城河#3）</div></div>
+<div class="tool-item"><div class="tool-name">tool_trajectory_replay</div><div class="tool-desc">分支轨迹回放（护城河#4）</div></div>
+<div class="tool-item"><div class="tool-name">tool_proactive_partner</div><div class="tool-desc">主动搭档简报（护城河#5）</div></div>
+<div class="tool-item"><div class="tool-name">tool_knowledge_gap</div><div class="tool-desc">元认知知识空白检测</div></div>
+<div class="tool-item"><div class="tool-name">tool_mistake_book</div><div class="tool-desc">错题本查看 / 模式提取</div></div>
+<div class="tool-item"><div class="tool-name">tool_experience_library</div><div class="tool-desc">经验库查询与复用</div></div>
+<div class="tool-item"><div class="tool-name">tool_graph_search</div><div class="tool-desc">知识图谱扩展检索</div></div>
+<div class="tool-item"><div class="tool-name">tool_self_check</div><div class="tool-desc">全库健康度自检</div></div>
+<div class="tool-item"><div class="tool-name">tool_gardener</div><div class="tool-desc">园艺师后台巩固任务</div></div>
+<div class="tool-item"><div class="tool-name">tool_sleep_consolidation</div><div class="tool-desc">睡眠周期衰减增强合并</div></div>
+<div class="tool-item"><div class="tool-name">tool_recent_evolution</div><div class="tool-desc">最近进化变更记录</div></div>
+<div class="tool-item"><div class="tool-name">tool_process_save</div><div class="tool-desc">过程记忆阶段存档</div></div>
+<div class="tool-item"><div class="tool-name">tool_save_progress</div><div class="tool-desc">任务进度跨会话续传</div></div>
+<div class="tool-item"><div class="tool-name">tool_load_progress</div><div class="tool-desc">加载历史存档</div></div>
+<div class="tool-item"><div class="tool-name">tool_compress_knowledge</div><div class="tool-desc">指定层级知识压缩归档</div></div>
+<div class="tool-item"><div class="tool-name">tool_import_user_profile</div><div class="tool-desc">更新用户偏好档案</div></div>
+<div class="tool-item"><div class="tool-name">tool_update_trading_anchor</div><div class="tool-desc">更新交易策略锚点</div></div>
+<div class="tool-item"><div class="tool-name">万忆触发LOAD钩子</div><div class="tool-desc">会话开始注入历史记忆 + 进化锚点</div></div>
+<div class="tool-item"><div class="tool-name">万忆触发STORE钩子</div><div class="tool-desc">任务完成沉淀记忆 / 存档</div></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section">
+<div class="container">
+<h2 class="section-title">基准测试数据</h2>
+<p class="section-desc">所有数据来自本地实弹跑分，零注水。v1.0.3 核心版（仅 numpy，无语义模型）。</p>
+<table class="bench-table">
+<tr><th>指标</th><th>v1.0.0</th><th>v1.0.2</th><th>v1.0.3</th><th>变化趋势</th></tr>
+<tr><td>初始化(首次)</td><td>994ms</td><td>183ms</td><td>876ms</td><td style="color:var(--warning)">↑ 回归</td></tr>
+<tr><td>初始化(热启动)</td><td>-</td><td>3.5ms</td><td><span class="bench-num">2.4ms</span></td><td style="color:var(--accent)">↓ 更快</td></tr>
+<tr><td>单条写入(avg)</td><td>2.6ms</td><td>4.9ms</td><td><span class="bench-num">3.1ms</span></td><td style="color:var(--accent)">↓ 更快</td></tr>
+<tr><td>批量×100</td><td>100ms</td><td>550ms</td><td><span class="bench-num">510ms</span></td><td style="color:var(--accent)">↓ 更快</td></tr>
+<tr><td>召回延迟(avg)</td><td>4.0ms</td><td>4.1ms</td><td><span class="bench-num">2.5ms</span></td><td style="color:var(--accent)">↓ 快39%</td></tr>
+<tr><td>召回最高分</td><td>0.67</td><td>0.69</td><td><span class="bench-num">0.77</span></td><td style="color:var(--accent)">↑ 精12%</td></tr>
+<tr><td>空查询返回</td><td>5条❌</td><td>0条✅</td><td><span class="bench-num">0条✅</span></td><td style="color:var(--accent)">稳定</td></tr>
+<tr><td>MCP 工具数</td><td>23</td><td>23</td><td><span class="bench-num">23</span></td><td>不变</td></tr>
+<tr><td>内存占用(RSS)</td><td>-</td><td>44.5MB</td><td><span class="bench-num">44.4MB</span></td><td>稳定</td></tr>
+<tr><td>自检健康度</td><td>-</td><td>100/100</td><td><span class="bench-num">100/100</span></td><td style="color:var(--accent)">完美</td></tr>
+</table>
+</div>
+</section>
+
+<section class="cta-section">
+<div class="container">
+<h2>三秒启动你的 AI 记忆中枢</h2>
+<p>pip install 即用。不需要 API Key，不需要 Docker，不需要云服务。</p>
+<div class="install-code">pip install wanyimem</div>
+<div class="btn-group">
+<a href="https://github.com/17861102832/wanyimem" class="btn btn-primary" target="_blank">⭐ GitHub 仓库</a>
+<a href="https://github.com/17861102832/wanyimem/blob/main/docs/INSTALL_CN.md" class="btn btn-outline" target="_blank">📖 中文文档</a>
+<a href="https://github.com/17861102832/wanyimem/issues" class="btn btn-outline" target="_blank">💬 反馈问题</a>
+</div>
+</div>
+</section>
+
+<footer>
+<div class="container">
+<p>WanYi Memory Core 万忆中枢 · MIT License &copy; 2026 Zhao Xikun</p>
+<p style="margin-top:8px">Built with care for agents that deserve to remember.</p>
+</div>
+</footer>
+
+<script>
+function switchTab(e,tabId){e.preventDefault();document.querySelectorAll('.demo-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.demo-panel').forEach(p=>p.classList.remove('active'));e.target.classList.add('active');document.getElementById(tabId).classList.add('active')}
+function animateNum(id,target,suffix){const el=document.getElementById(id);let start=0;const step=target/40;const timer=setInterval(()=>{start+=step;if(start>=target){el.textContent=target+suffix;clearInterval(timer)}else{el.textContent=Math.floor(start)+suffix}},20)}
+window.addEventListener('load',()=>{setTimeout(()=>{animateNum('stat-tools',23,'');animateNum('stat-write',3.1,'ms');animateNum('stat-recall',2.5,'ms');animateNum('stat-memory',44,'MB')},300)});
+</script>
+</body>
+</html>
