@@ -66,6 +66,23 @@ def test_graph_auto_link(engine):
     assert edges >= 1, "same-category edge should be auto-created"
 
 
+def test_graph_search_after_record(engine):
+    """回归：记录带 category 的记忆后，graph_search 必须能搜到。
+    之前 auto_graph_link 建了 graph_nodes 却没挂接 memory_node_links，
+    导致 graph_search 的 memory_node_links JOIN 恒为空 →『记录→查图谱』恒为 0。"""
+    engine.tool_record_memory(
+        content="追高买入新能源基金被套两年，教训是别在情绪高点追涨",
+        layer="道", mem_type="principle", category="交易纪律",
+    )
+    # 用记忆内容里的关键词搜图谱
+    resp = engine.tool_graph_search("追高", depth=2, limit=20)
+    assert resp.get("results_count", 0) >= 1, (
+        f"graph_search 应返回至少 1 条关联记忆，实际 results_count={resp.get('results_count')}"
+    )
+    contents = [r.get("content", "") for r in resp.get("results", [])]
+    assert any("追高" in c for c in contents), "图谱应命中含'追高'的记忆"
+
+
 def test_time_fields(engine):
     engine.tool_record_memory(content="2026年5月基金大跌死扛不止损亏了18%", layer="法")
     resp = engine.tool_recall_memory("认赔离场到底对不对", limit=5)

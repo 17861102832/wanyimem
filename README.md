@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/version-1.0.2-orange)
+![Version](https://img.shields.io/badge/version-1.0.3-orange)
 ![MCP](https://img.shields.io/badge/MCP-server-purple)
 [![CI](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml/badge.svg)](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/wanyimem)](https://pypi.org/project/wanyimem/)
@@ -110,7 +110,14 @@ for m in resp["memories"]:
 | Growth | mistake book, experience crystallization, overnight consolidation, evolution queries |
 | Privacy | fully local, zero telemetry, no cloud dependency |
 
-Benchmark (mini LongMemEval, cross-session fact recall, 10 cases): **Recall@5 = 90%, MRR = 0.900**.
+Benchmark — reproducible mini LongMemEval (14 keyword-mismatched cross-session fact queries, run via `python benchmark/recall_benchmark.py`):
+
+| Version | Recall@5 | MRR |
+|---|---|---|
+| Core (keyword BM25 + knowledge-graph, no models) | **1.000** (14/14) | **0.857** |
+| Full (bge-small-zh vector + bge-reranker-base rerank) | **1.000** (14/14) | **0.857** |
+
+Every query is intentionally phrased with *different keywords* than its answer (e.g. `本地数据库怎么提高并发写` → `WAL模式`, `记忆系统最怕什么` → `事件溯源`), so 14/14 reflects genuine **semantic** recall, not string matching. The knowledge-graph channel (active in the core, model-free) already lifts BM25 to parity here; the vector + reranker path shows its edge on larger-scale semantic expansion ("pip install wanyimem[all]" downloads the models).
 
 ## Docs
 

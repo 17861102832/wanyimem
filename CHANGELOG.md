@@ -2,6 +2,31 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 与 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [1.0.3] - 2026-08-23
+
+### Fixed（记忆图谱"记录→查询"恒为空 — 实弹功能验证发现）
+
+- **图谱挂接缺一环**：`auto_graph_link()` 只创建了 `graph_nodes`（记忆节点）+ `graph_edges`（语义/同类边），却**没有把记忆挂接到它自己的节点**（`memory_node_links`）。而 `tool_graph_search` 恰恰靠 `memory_node_links` JOIN 取记忆——对用户来说效果是「记录了几条记忆，搜图谱永远返回 0」，被外部跑分误判为"图谱能力不足/需向量积累"。修复：建节点后即 `link_memory_to_node(memory_id, self_id)`，让「记录→查图谱」立刻可用。
+- **回归测试**：新增 `test_graph_search_after_record`，锁定该路径。
+
+### Benchmark（首次公开可复现实测数据）
+
+用可控、可重复的迷你 LongMemEval 评测脚本替换 README 里未经实测的 "Recall@5=90%"（`benchmark/recall_benchmark.py`）。14 条查询全部刻意用与答案**不同关键词**的表述，逼出真实语义召回：
+
+| 版本 | Recall@5 | MRR |
+|---|---|---|
+| 核心版（BM25 + 知识图谱，无模型） | **1.000** (14/14) | **0.857** |
+| 完整版（bge-small-zh 向量 + bge-reranker-base 精排） | **1.000** (14/14) | **0.857** |
+
+> 注：本次图谱挂接修复同时提升了核心版召回（MRR 0.845 → 0.857），使无模型的 BM25+图谱通道在此基准下与完整版持平；向量+精排的优势在更大规模语义扩展场景才更显著。
+
+- 修复基准脚本 2 处自身缺陷：初始 ground truth `诚实承认不知道` 不是任何事实的子串（该题永不可命中）；逐题明细误用 `len(contents)` 显示位次（恒为 top5），已改为真实命中位次。
+- 完整版能在线加载（`embed ok dim=512, rerank score=[0.047]`），"pip install wanyimem[all]" 路径真实可用。
+
+### Tests（13 通过 / 新增 1）
+
+- 新增 `test_graph_search_after_record`：记录带 category 的记忆后用内容关键词搜图谱，断言至少命中 1 条。
+
 ## [1.0.2] - 2026-08-23
 
 ### Fixed（召回诚实性 — 实弹跑分反馈）

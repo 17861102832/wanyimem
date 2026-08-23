@@ -1187,6 +1187,10 @@ class MemoryDB:
             if not self_node:
                 return
             self_id = self_node["node_id"]
+            # v1.1 修复：把记忆挂接到它自己的图谱节点。
+            # graph_search 靠 memory_node_links 取记忆，若不在此挂接，
+            # 则「记录记忆→查图谱」恒为 0（真架构缺口，非"数据不够"）。
+            self.link_memory_to_node(memory_id, self_id, weight=1.0)
             created = 0
 
             # 1. 语义相似边

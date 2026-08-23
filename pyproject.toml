@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wanyimem"
-version = "1.0.2"
+version = "1.0.3"
 description = "永不遗忘的全量记忆系统 — 事件溯源 + 过程记忆 + 语义向量检索 + reranker精排 + 记忆图谱 + 元认知知识空白，23个MCP工具"
 readme = "README.md"
 license = "MIT"

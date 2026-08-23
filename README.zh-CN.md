@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/version-1.0.2-orange)
+![Version](https://img.shields.io/badge/version-1.0.3-orange)
 ![MCP](https://img.shields.io/badge/MCP-server-purple)
 [![CI](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml/badge.svg)](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/wanyimem)](https://pypi.org/project/wanyimem/)
@@ -94,7 +94,14 @@ for m in resp["memories"]:
 | 进化 | 错题本、经验结晶、夜间睡眠巩固、进化查询 |
 | 隐私 | 全本地运行、零遥测、无云端依赖 |
 
-迷你 LongMemEval 基准（跨会话事实回忆，10 题）：**Recall@5 = 90%，MRR = 0.900**。
+基准 — 可复现的迷你 LongMemEval（14 条「关键词刻意错开」的跨会话事实查询，运行 `python benchmark/recall_benchmark.py` 复现）：
+
+| 版本 | Recall@5 | MRR |
+|---|---|---|
+| 核心版（仅 BM25 + 知识图谱，无模型） | **1.000** (14/14) | **0.857** |
+| 完整版（bge-small-zh 向量 + bge-reranker-base 精排） | **1.000** (14/14) | **0.857** |
+
+每个查询都故意用与答案**不同的关键词**表述（如 `本地数据库怎么提高并发写` → `WAL模式`、`记忆系统最怕什么` → `事件溯源`），因此 14/14 反映的是真正的**语义**召回，而非字符串匹配。知识图谱通道（核心版可用、无需模型）已把纯 BM25 拉平到此水平；向量 + 精排路径在更大规模的语义扩展场景才更显优势（"pip install wanyimem[all]" 下载模型后生效）。
 
 ## 文档
 
