@@ -97,7 +97,7 @@ def recall_sessions(eng, question, k=5):
     return hit_sids
 
 
-def evaluate(eng, instances, max_samples=None, k=5, skip_abstention=True):
+def evaluate(eng_factory, instances, max_samples=None, k=5, skip_abstention=True):
     rr_sum = 0.0
     hits = 0
     n = 0
@@ -112,6 +112,8 @@ def evaluate(eng, instances, max_samples=None, k=5, skip_abstention=True):
         answer_sids = set(inst.get("answer_session_ids", []))
         if not answer_sids:
             continue
+        # 每实例独立记忆库（LongMemEval 官方按实例独立评测，避免跨实例串扰）
+        eng = eng_factory()
         t0 = time.time()
         write_instance(eng, inst)
         hit_sids = recall_sessions(eng, inst.get("question", ""), k=k)
@@ -145,13 +147,12 @@ def build_engine(mode):
         os.environ.setdefault("WANYI_EMBED_MODEL", "BAAI/bge-m3")
         os.environ.setdefault("WANYI_RERANK_MODEL", "BAAI/bge-reranker-v2-m3")
     from wanyi.memory_core import WanYiCore
-    eng = WanYiCore(db_path=":memory:")
-    if mode == "core":
-        import wanyi.vector_memory as vm
-        import wanyi.reranker as rr
-        vm._model_ok = False; vm._model_instance = None
-        rr._model_ok = False; rr._model_instance = None
-    return eng
+
+    def factory():
+        # 每实例独立 :memory: 库；模型模块级懒加载，首个实例后复用
+        return WanYiCore(db_path=":memory:")
+
+    return factory
 
 
 def main():
@@ -168,8 +169,8 @@ def main():
     instances = load_instances(path)
     print(f"[data] {path.name} | 实例数 {len(instances)} | mode={args.mode} k={args.k}")
 
-    eng = build_engine(args.mode)
-    res = evaluate(eng, instances, max_samples=args.max_samples, k=args.k)
+    eng_factory = build_engine(args.mode)
+    res = evaluate(eng_factory, instances, max_samples=args.max_samples, k=args.k)
     print("\n=== LongMemEval 检索结果（session 粒度）===")
     print(f"  样本数 n   = {res['n']}")
     print(f"  Recall@{args.k} = {res['recall@k']:.4f}  ({res['hits']}/{res['n']})")
