@@ -4,16 +4,33 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/version-1.0.0-orange)
+![Version](https://img.shields.io/badge/version-1.0.2-orange)
 ![MCP](https://img.shields.io/badge/MCP-server-purple)
 [![CI](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml/badge.svg)](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/wanyimem)](https://pypi.org/project/wanyimem/)
 
 ---
 
+## Why this is different
+
+Most memory systems store your data in the cloud, need a heavy dependency stack, or only do keyword
+search. **wanyimem is local-first, single-file SQLite, and installs with one dependency (numpy).**
+
+| | wanyimem | typical memory server |
+|---|---|---|
+| Data | **never leaves your machine** (zero telemetry) | cloud / SaaS |
+| Infra | **SQLite single file**, no separate vector DB | Qdrant / Neo4j / Postgres |
+| Defaults | **shadows the agent**, blocks high-risk actions, opens counterfactual branches | stores & retrieves |
+| Resources | **runs on 2-core / 2GB** | heavier |
+| Evolves | **zero-participation** (learns from your mistakes automatically) | manual "remember this" |
+
+**23 MCP tools, open source (MIT), Python 3.10+, `pip install wanyimem`.**
+
+---
+
 ## Why
 
-LLM agents forget. Every chat window is amnesia: preferences, lessons, and hard-won experience evaporate when the session ends. Existing memory systems either store in the cloud (privacy risk), require heavy infrastructure, or only do keyword search (missing semantic recall).
+LLM agents forget. Every chat window is amnesia: preferences, lessons, and hard-won experience evaporate when the session ends.
 
 WanYi Memory Core is a **local-first, full-quantity, self-evolving memory system**:
 
