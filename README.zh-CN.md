@@ -49,12 +49,15 @@ pip install "wanyimem[all]"     # 含向量 & 精排模型依赖
       "command": "python",
       "args": ["-m", "wanyi.memory_core"],
       "env": {
-        "万忆中枢_STORE_DIR": "C:/path/to/your/memory"
+        "WANYI_STORE_DIR": "C:/path/to/your/memory"
       }
     }
   }
 }
 ```
+
+> 环境变量 key 支持「中文优先、英文兜底」：新版用 `WANYI_STORE_DIR`（推荐，跳平台更稳），旧版中文名 `万忆中枢_STORE_DIR` 同样兼容。
+> 裸 `python` 依赖 PATH 可能启动失败，建议用解释器绝对路径，或 `pip install wanyimem` 后直接用 `"command": "wanyi"`。
 
 之后任意智能体都能调用 23 个工具：
 

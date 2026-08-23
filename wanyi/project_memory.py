@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(__file__))
+from env_compat import get_env  # v1.1：中文优先/英文兜底
 from memory_core import (
     LAYER_FA,
     LAYER_SHU,
@@ -33,8 +34,9 @@ from memory_core import (
     now_iso,
 )
 
-PROJECT_CONTEXT_PATH = os.environ.get(
+PROJECT_CONTEXT_PATH = get_env(
     "万忆中枢_PROJECT_CONTEXT",
+    "WANYI_PROJECT_CONTEXT",
     str(Path.home() / ".wanyi" / "project_context.md")  # v5.0开源脱敏：默认通用路径
 )
 

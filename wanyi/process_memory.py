@@ -150,8 +150,10 @@ class ProcessMemory:
         """
         anchor_id = f"ANCHOR_{process_id[:20]}_{phase}_{int(time.time())}"
         # 存到 checkpoint 表（复用冷续传机制）
+        # v1.1：state 里补存 process_id，修复只传 anchor_id 恢复时 process_id 丢失
         self.db.save_checkpoint(anchor_id, process_id, f"{phase}-锚点", 0.0,
-                                {"anchor_point": anchor_point, "anchor_phase": phase, **state}, self.session_id)
+                                {"anchor_point": anchor_point, "anchor_phase": phase,
+                                 "process_id": process_id, **state}, self.session_id)
         # 更新 process_events 对应阶段
         self.db.conn.execute("""
             UPDATE process_events SET anchor = ? WHERE process_id = ? AND phase = ?
@@ -184,6 +186,9 @@ class ProcessMemory:
             return {"status": "no_anchor", "message": "未找到记忆锚点，需从头开始"}
 
         state = ckpt.get("state", {})
+        # v1.1：优先从 checkpoint state 恢复 process_id（修复仅传 anchor_id 时 process_id 丢失）
+        if not process_id and state.get("process_id"):
+            process_id = state["process_id"]
         anchor_phase = state.get("anchor_phase", "")
         # 计算已完成阶段
         done_rows = self.db.conn.execute("""

@@ -49,12 +49,14 @@ Add to your `mcp.json` (Claude Desktop, Cursor, Trae, etc.):
       "command": "python",
       "args": ["-m", "wanyi.memory_core"],
       "env": {
-        "万忆中枢_STORE_DIR": "C:/path/to/your/memory"
+        "WANYI_STORE_DIR": "C:/path/to/your/memory"
       }
     }
   }
 }
 ```
+
+> Env keys are "Chinese-first, ASCII-fallback": the new `WANYI_STORE_DIR` (recommended, more portable) and the legacy `万忆中枢_STORE_DIR` both work. Bare `python` depends on PATH and may fail; prefer an absolute interpreter path, or `pip install wanyimem` then use `"command": "wanyi"`.
 
 Then any agent can call the 23 tools, e.g.:
 

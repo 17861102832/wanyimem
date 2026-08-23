@@ -18,10 +18,11 @@
 ╚══════════════════════════════════════════════════════════════════╝
 """
 import json
-import os
 import re
 from datetime import datetime
 from pathlib import Path
+
+from env_compat import get_env  # v1.1：中文优先/英文兜底
 
 # 相似度阈值
 DUP_THRESHOLD = 0.85      # 冗余检测：内容相似度
@@ -93,6 +94,7 @@ class Gardener:
         score_b = conf_b["confidence"] if conf_b else 0.5
 
         # 冲突时给两者都加摩擦（降低置信度，提醒谨慎）
+        verdict = "conflict_unresolved"  # v1.1：默认兜底，防止 hasattr=False 时 UnboundLocalError
         if hasattr(self.db, "confidence"):
             if abs(score_a - score_b) < 0.1:
                 self.db.confidence.challenge("memory", memory_id_a, "与另一记忆冲突")
@@ -203,7 +205,7 @@ class Gardener:
             task = r["task_name"]
             skill_name = self._skill_name(task)
             if not skill_dir:
-                skill_dir = Path(os.environ.get("万忆中枢_SKILL_DIR",
+                skill_dir = Path(get_env("万忆中枢_SKILL_DIR", "WANYI_SKILL_DIR",
                     str(Path(__file__).parent / "skills_crystal")))
             skill_dir.mkdir(parents=True, exist_ok=True)
             skill_file = skill_dir / f"{skill_name}.md"
@@ -361,8 +363,21 @@ class Gardener:
         return cleaned[:40] if cleaned else "unnamed"
 
     def self_check(self) -> dict:
+        # v1.1：contradiction 候选改为实际巡检近期含否定词记忆（原先传空串恒为 0，自检静默失效）
+        cand = 0
+        try:
+            recent = self.db.conn.execute("""
+                SELECT memory_id, content FROM memories
+                ORDER BY updated_at DESC LIMIT 30
+            """).fetchall()
+            for r in recent:
+                if (any(kw in (r["content"] or "") for kw in CONTRADICT_KEYWORDS)
+                        and self.detect_contradictions(r["content"], exclude_id=r["memory_id"])):
+                    cand += 1
+        except Exception:
+            cand = 0
         return {
-            "contradiction_candidates": len(self.detect_contradictions("")),
+            "contradiction_candidates": cand,
             "redundancy_pairs": len(self.detect_redundancy()),
             "insights": len(self.extract_insights().get("insights", [])),
             "last_deep_consolidation": self.db.conn.execute("""

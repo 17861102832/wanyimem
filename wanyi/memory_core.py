@@ -30,18 +30,20 @@ import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from env_compat import get_env  # v1.1：中文优先/英文兜底
+
 # ═══════════════════════════════════════════════════════════════════
 # 环境变量与路径配置
 # ═══════════════════════════════════════════════════════════════════
-STORE_DIR = Path(os.environ.get("万忆中枢_STORE_DIR",
+STORE_DIR = Path(get_env("万忆中枢_STORE_DIR", "WANYI_STORE_DIR",
     os.path.join(os.path.dirname(__file__), "memory")))
-DB_PATH = Path(os.environ.get("万忆中枢_MEMORY_DB",
+DB_PATH = Path(get_env("万忆中枢_MEMORY_DB", "WANYI_MEMORY_DB",
     os.path.join(STORE_DIR, "db", "万忆.db")))
-USER_PROFILE = os.environ.get("万忆中枢_USER_PROFILE", "")
-TRADING_ANCHOR = os.environ.get("万忆中枢_TRADING_ANCHOR", "")
-INDEX_PATH = Path(os.environ.get("万忆中枢_INDEX",
+USER_PROFILE = get_env("万忆中枢_USER_PROFILE", "WANYI_USER_PROFILE", "")
+TRADING_ANCHOR = get_env("万忆中枢_TRADING_ANCHOR", "WANYI_TRADING_ANCHOR", "")
+INDEX_PATH = Path(get_env("万忆中枢_INDEX", "WANYI_INDEX",
     os.path.join(os.path.dirname(__file__), "index.json")))
-OBSIDIAN_VAULT = Path(os.environ.get("OBSIDIAN_VAULT", "").strip()) if os.environ.get("OBSIDIAN_VAULT", "").strip() else None
+OBSIDIAN_VAULT = Path(get_env("OBSIDIAN_VAULT", "OBSIDIAN_VAULT", "").strip()) if get_env("OBSIDIAN_VAULT", "OBSIDIAN_VAULT", "").strip() else None
 SESSION_ID = os.environ.get("TRAECN_SESSION_ID", "unknown")
 EVENT_LOG_DIR = STORE_DIR / "event_logs"
 
@@ -835,6 +837,10 @@ class MemoryDB:
             out = []
             for r in rows:
                 d = self._row_to_dict(r)
+                # v1.1：空查询兜底路径按 min_confidence 过滤（hook_load 道/法级注入意图）
+                conf = float(d.get("confidence") or 0.0)
+                if conf < min_confidence:
+                    continue
                 d["_score"] = 0.1
                 d["_fallback"] = True
                 out.append(d)
@@ -3412,7 +3418,7 @@ def handle_request(req: dict) -> dict:
                     },
                     "serverInfo": {
                         "name": "万忆中枢·全量之心",
-                        "version": "1.0.0",
+                        "version": "1.0.1",
                         "description": "全量记忆中枢 v5.0「六护城河+向量+精排+图谱+时序+元认知」：事件溯源 + 过程记忆 + 错题本 + 经验库 + 认知置信度决策拦截 + 反事实平行分支 + 跨域类比迁移 + 决策轨迹回放 + 主动简报/体检/周复盘 + 语义向量混合召回 + reranker精排 + 记忆关系图谱 + 时序衰减 + 知识空白元认知，23个MCP工具全局可用",
                     },
                 },

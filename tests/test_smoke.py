@@ -132,3 +132,50 @@ def test_tool_count_after_fix(engine):
     # 确认核心工具都在
     for required in ("万忆置信度决策检查", "万忆反事实之镜", "万忆错题本", "万忆召回记忆"):
         assert required in names, f"缺少关键工具: {required}"
+
+
+def test_restore_anchor_recovers_process_id(engine):
+    """回归：仅传 anchor_id 时 restore_from_anchor 必须能从 checkpoint state 恢复 process_id（之前丢失）"""
+    # 手动设一个锚点（走 set_anchor 才会把 process_id 写进 state）
+    set_resp = engine.process.set_anchor(
+        process_id="anchor_test_pid", phase="尝试",
+        anchor_point="已完成尝试阶段", state={"note": "test"}
+    )
+    resp = engine.process.restore_from_anchor(anchor_id=set_resp["anchor_id"])
+    assert resp["status"] == "restored", f"恢复失败: {resp}"
+    # v1.1：不传 process_id 也能从 checkpoint state 恢复出 process_id
+    assert resp["process_id"] == "anchor_test_pid", f"process_id 应从 state 恢复，实际 {resp['process_id']}"
+
+
+def test_arbitrate_conflict_no_unbound_local(engine):
+    """回归：arbitrate_conflict 在 db 未挂载 confidence 时不得抛 UnboundLocalError（之前必现）"""
+    from wanyi.gardener import Gardener
+    engine.tool_record_memory(content="A方案：满仓", layer="道", mem_type="principle")
+    engine.tool_record_memory(content="B方案：只买两成", layer="道", mem_type="principle")
+    ids = [r["memory_id"] for r in engine.db.conn.execute(
+        "SELECT memory_id FROM memories ORDER BY rowid ASC").fetchall()]
+    # 摘掉 db 的 confidence 挂载，模拟"未走 WanYiCore.__init__ 反向挂载"的裸 db 场景（原始 bug 触发条件）
+    if hasattr(engine.db, "confidence"):
+        del engine.db.confidence
+    gard = Gardener(engine.db, engine._session_id)
+    try:
+        r = gard.arbitrate_conflict(ids[0], ids[1])
+    except Exception as e:
+        pytest.fail(f"arbitrate_conflict 不应抛异常，实际: {type(e).__name__}: {e}")
+    # 无 confidence 挂载时 verdict 应取默认兜底值，而非 UnboundLocalError
+    assert r.get("verdict") == "conflict_unresolved", f"verdict 应为兜底值，实际: {r}"
+
+
+def test_min_confidence_fallback_filter(engine):
+    """回归：recall 空查询兜底路径必须按 min_confidence 过滤（hook_load 道/法级注入意图，之前参数被忽略）"""
+    engine.tool_record_memory(content="高置信原则：永远带止损", layer="道", mem_type="principle")
+    # 把这条记忆置信度设为 0.9，另一条无关低置信记忆设为 0.1
+    engine.db.conn.execute("UPDATE memories SET confidence = 0.9 WHERE content LIKE '%高置信原则%'")
+    engine.tool_record_memory(content="随便的一条低置信笔记", layer="道", mem_type="observation")
+    engine.db.conn.execute("UPDATE memories SET confidence = 0.1 WHERE content = '随便的一条低置信笔记'")
+    engine.db.conn.commit()
+    # 空查询 + min_confidence=0.5 → 只应返回置信度 >= 0.5 的记忆
+    hit = engine.db.recall(query="", layer="道", limit=50, min_confidence=0.5)
+    assert hit, "至少应有一条高置信记忆返回"
+    for m in hit:
+        assert float(m.get("confidence") or 0) >= 0.5, f"兜底路径应过滤置信度过低的记忆: {m['memory_id']}"

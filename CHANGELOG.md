@@ -2,6 +2,27 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 与 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [1.0.1] - 2026-08-23
+
+### Changed（可移植性增强 + 文档同步）
+
+- **环境变量兼容层**：新增 `env_compat.py`，所有配置项支持「中文优先、英文兜底」双 key。旧中文 key（`万忆中枢_STORE_DIR`）完全兼容，新增 ASCII 别名（`WANYI_STORE_DIR` / `WANYI_MEMORY_DB` / `WANYI_USER_PROFILE` / `WANYI_TRADING_ANCHOR` / `WANYI_INDEX` / `WANYI_SKILL_DIR` / `WANYI_PROJECT_CONTEXT` / `WANYI_EMBED_MODEL` / `WANYI_RERANK_MODEL`），提升跨平台/CI/客户端兼容性，不破坏任何现有配置
+- **文档更新**：`README.md` / `README.zh-CN.md` / `docs/INSTALL_CN.md` / `examples/mcp.example.json` 同步改用推荐的新写法，并补充「绝对路径解释器 / `wanyi` console 入口」更稳的启动方式说明
+
+### Fixed（4 处真实 bug + 1 处参数未生效，全量审查第三轮）
+
+- **`gardener.arbitrate_conflict` UnboundLocalError（Warning）**：`verdict` 只在 `if hasattr(self.db, "confidence"):` 为 True 的分支赋值。当 `Gardener` 用未挂载 `confidence` 的裸 db 实例化时，第 109/112 行引用未赋值变量抛 `UnboundLocalError`。已加默认兜底值 `verdict = "conflict_unresolved"`。
+- **`confidence.needs_review` 时区偏差（Warning）**：`last_updated` 由 `now_iso()`（本地、无时区）写入，但 SQL 用 `julianday('now')`（UTC）比较，导致中国时区**复习到期判定系统性偏晚约 8 小时**。比较端已改用 `julianday('now','localtime')` 对齐（不改写入格式，避免影响所有时间戳）。
+- **记忆锚点恢复丢失 `process_id`（Info）**：只传 `anchor_id` 调 `restore_from_anchor` 时，因 `set_anchor` 未把 `process_id` 存入 checkpoint state，导致返回 `process_id=None`、`completed_phases` 恒空。`set_anchor` 的 state 已补存 `process_id`，恢复时优先从 state 取回。
+- **自检 `contradiction_candidates` 恒为 0（Info，静默失效）**：`self_check` 传空字符串 `""` 给 `detect_contradictions`，因该函数先检查否定词、空串恒 `[]`，导致该自检指标永远为 0。已改为实际巡检近期 30 条含否定词记忆。
+- **`recall` 的 `min_confidence` 参数从未生效**：空查询兜底路径（`hook_load` 道/法级注入走的正是这条）不按置信度过滤，导致 `min_confidence=0.5/0.6` 形同虚设。兜底路径已补按 `min_confidence` 过滤。
+
+### Tests（9 → 12）
+
+- 新增 `test_restore_anchor_recovers_process_id`（锚点恢复 process_id 回归）
+- 新增 `test_arbitrate_conflict_no_unbound_local`（矛盾仲裁不抛 UnboundLocalError 回归）
+- 新增 `test_min_confidence_fallback_filter`（空查询兜底按置信度过滤回归）
+
 ## [1.0.0] - 2026-08-22
 
 ### Added（首发全量功能，源自内部 v5.0 五轮迭代）

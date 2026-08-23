@@ -10,9 +10,10 @@ import sqlite3
 from pathlib import Path
 
 import numpy as np
+from env_compat import get_env  # v1.1：中文优先/英文兜底
 
 # 中文向量模型名（可换更强模型）
-EMBED_MODEL_NAME = os.environ.get("万忆中枢_EMBED_MODEL", "BAAI/bge-small-zh-v1.5")
+EMBED_MODEL_NAME = get_env("万忆中枢_EMBED_MODEL", "WANYI_EMBED_MODEL", "BAAI/bge-small-zh-v1.5")
 # 首次下载/加载走 hf-mirror（国内可达）
 if not os.environ.get("HF_ENDPOINT"):
     os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"

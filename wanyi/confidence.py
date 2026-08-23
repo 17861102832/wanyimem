@@ -193,11 +193,13 @@ class Confidence:
         """FSRS 到期复习队列（园艺师调用）：返回超过 min_age_days 未复习的记录，最旧的优先。
         min_age_days = 距 last_updated 至少多少天才算"到期需复习"。
         """
+        # v1.1：last_updated 由 now_iso()（本地、无时区）写入，故比较端用 localtime 对齐，
+        # 避免 julianday('now')（UTC）导致中国时区约 8 小时偏差、复习调度偏晚。
         rows = self.db.conn.execute("""
             SELECT * FROM confidence
             WHERE target_type = ?
               AND confidence <= 0.7
-              AND (julianday('now') - julianday(last_updated)) >= ?
+              AND (julianday('now','localtime') - julianday(last_updated)) >= ?
             ORDER BY last_updated ASC
             LIMIT ?
         """, (target_type, min_age_days, limit)).fetchall()

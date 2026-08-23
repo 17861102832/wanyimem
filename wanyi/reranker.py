@@ -7,8 +7,10 @@ v5.2 语义精排模块 — 护城河补强 #2（召回质量再上一台阶）
 import os
 import sys
 
+from env_compat import get_env  # v1.1：中文优先/英文兜底
+
 # 中文重排模型名（可换更强模型，如 bge-reranker-v2-m3）
-RERANK_MODEL_NAME = os.environ.get("万忆中枢_RERANK_MODEL", "BAAI/bge-reranker-base")
+RERANK_MODEL_NAME = get_env("万忆中枢_RERANK_MODEL", "WANYI_RERANK_MODEL", "BAAI/bge-reranker-base")
 # 首次下载/加载走 hf-mirror（国内可达）
 if not os.environ.get("HF_ENDPOINT"):
     os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"

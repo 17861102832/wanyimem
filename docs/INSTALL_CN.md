@@ -37,14 +37,20 @@ export HF_ENDPOINT=https://hf-mirror.com
       "command": "python",
       "args": ["-m", "wanyi.memory_core"],
       "env": {
-        "万忆中枢_STORE_DIR": "C:/path/to/your/memory"
+        "WANYI_STORE_DIR": "C:/path/to/your/memory"
       }
     }
   }
 }
 ```
 
-`万忆中枢_STORE_DIR` 是记忆库目录（SQLite + 事件日志），请务必指向**你自己的私有目录**，不要提交到任何仓库。
+`WANYI_STORE_DIR` 是记忆库目录（SQLite + 事件日志），请务必指向**你自己的私有目录**，不要提交到任何仓库。
+
+> **兼容旧写法**：环境变量 key 支持「中文优先、英文兜底」。既可用新推荐的 `WANYI_STORE_DIR`，也可用旧的中文名 `万忆中枢_STORE_DIR`，两者填任一个即可；都填时以中文为准。
+
+> **启动命令建议**：裸 `python` 依赖 PATH，部分机器是 `python3` 或解释器不在 PATH，可能启动失败。更稳的两种方式：
+> - 用解释器绝对路径。Windows 常见：`"command": "C:/Python312/python.exe"`
+> - 先 `pip install wanyimem`，完成后直接用 console 入口 `"command": "wanyi"`
 
 ## 三、23 个工具速览
 
