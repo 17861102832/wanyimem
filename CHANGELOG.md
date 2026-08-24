@@ -2,6 +2,14 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 与 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [1.0.6] - 2026-08-24
+
+### Changed（向量写入性能 — 批量嵌入）
+
+- **批量嵌入**：`VectorIndex.store_batch` 从「逐条 store（每条一次嵌入）」改为「一次 `encode` 批量嵌入全部，再统一落库」。大量记忆灌入（如 LongMemEval 式批量 ingest / 批量导入历史）显著提速。
+- **结构**：抽出 `_store_vec`（权威表 + ANN 影子表共用）与 `_embed_batch`（有模型走一次 encode；无模型/失败逐条兜底，可被测试 mock）。
+- **测试**：`test_vector_ann.py` 新增 `test_store_batch_embeds_once`：mock 模型断言 `encode` 只调用 1 次且全部落库。
+
 ## [1.0.5] - 2026-08-24
 
 ### Added（只读 Markdown 镜像 + 护城河全自动）

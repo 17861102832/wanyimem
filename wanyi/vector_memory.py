@@ -200,6 +200,12 @@ class VectorIndex:
         vec = embed_text(content)
         if vec is None:
             return
+        self._store_vec(memory_id, vec)
+
+    def _store_vec(self, memory_id: str, vec):
+        """写一条已算好的向量进权威表 + 镜像 ANN 影子表（store/store_batch 共用）"""
+        if not memory_id or vec is None:
+            return
         dim = int(vec.shape[0])
         from datetime import datetime
         now = datetime.now().isoformat()
@@ -213,6 +219,18 @@ class VectorIndex:
             return
         # 镜像进 ANN 影子表（失败不影响精确通道）
         self._mirror_to_ann(memory_id, vec, dim)
+
+    def _embed_batch(self, texts):
+        """批量编码：有模型走一次 encode（大提速）；无模型/失败则逐条 embed_text（可被测试 mock）。"""
+        model = _get_model()
+        if model is not None:
+            try:
+                clipped = [(t or "")[:512] for t in texts]
+                vecs = model.encode(clipped, batch_size=32, normalize_embeddings=True)
+                return [np.asarray(v, dtype=np.float32) for v in vecs]
+            except Exception:
+                pass
+        return [embed_text(t) for t in texts]
 
     def _mirror_to_ann(self, memory_id: str, vec, dim: int):
         if not self._load_vec():
@@ -244,9 +262,15 @@ class VectorIndex:
                 pass
 
     def store_batch(self, items):
-        """批量写入 [(memory_id, content), ...]"""
-        for mid, content in items:
-            self.store(mid, content)
+        """批量写入 [(memory_id, content), ...]：一次嵌入一批，显著快于逐条 store()"""
+        texts = [c for _, c in items]
+        vecs = self._embed_batch(texts)
+        for (mid, content), vec in zip(items, vecs):
+            if not mid or not content:
+                continue
+            if vec is None:
+                continue
+            self._store_vec(mid, vec)
 
     # ── 检索 ──────────────────────────────────────────────────────
 

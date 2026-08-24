@@ -100,3 +100,30 @@ def test_dim_change_keeps_authority(idx, monkeypatch):
         assert idx._ann_dim == 16, "ANN 维度应更新为 16"
         ann = idx.conn.execute("SELECT COUNT(*) FROM memory_ann").fetchone()[0]
         assert ann == 1, "ANN 只索引新维度向量"
+
+
+def test_store_batch_embeds_once(idx, monkeypatch):
+    """store_batch 应批量编码（encode 只调 1 次）且全部落库，比逐条 store 快。"""
+    calls = {"encode": 0}
+
+    class FakeModel:
+        def encode(self, texts, batch_size=32, normalize_embeddings=True):
+            calls["encode"] += 1
+            out = []
+            import re as _re
+            for t in texts:
+                m = _re.search(r"第(\d+)只", t or "")
+                v = np.zeros(8, dtype=np.float32)
+                if m:
+                    v[int(m.group(1)) % 8] = 1.0
+                out.append(v)
+            return out
+
+    monkeypatch.setattr(vm, "_get_model", lambda: FakeModel())
+    items = [(f"b{i}", f"第{i}只基金") for i in range(8)]
+    idx.store_batch(items)
+    assert idx.count() == 8, "应写入全部 8 条"
+    assert calls["encode"] == 1, "应一次批量编码，而非逐条"
+    if HAS_VEC:
+        ann = idx.conn.execute("SELECT COUNT(*) FROM memory_ann").fetchone()[0]
+        assert ann == 8, "ANN 影子表应同步 8 条"
