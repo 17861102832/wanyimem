@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/version-1.0.3-orange)
+![Version](https://img.shields.io/badge/version-1.1.0-orange)
 ![MCP](https://img.shields.io/badge/MCP-server-purple)
 [![CI](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml/badge.svg)](https://github.com/17861102832/wanyimem/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/wanyimem)](https://pypi.org/project/wanyimem/)
@@ -135,6 +135,22 @@ Benchmark — reproducible mini LongMemEval (14 keyword-mismatched cross-session
 | Full (bge-small-zh vector + bge-reranker-base rerank) | **1.000** (14/14) | **0.857** |
 
 Every query is intentionally phrased with *different keywords* than its answer (e.g. `本地数据库怎么提高并发写` → `WAL模式`, `记忆系统最怕什么` → `事件溯源`), so 14/14 reflects genuine **semantic** recall, not string matching. The knowledge-graph channel (active in the core, model-free) already lifts BM25 to parity here; the vector + reranker path shows its edge on larger-scale semantic expansion ("pip install wanyimem[all]" downloads the models).
+
+## Architecture (1.1.0)
+
+```
+wanyi/
+├── core_base.py    # constants · four-factor scoring · MemoryDB (SQLite engine)
+├── engine.py       # WanYiCore · 23 MCP tools · MCP_TOOLS registry · JSON-RPC dispatch
+├── transport.py    # MCP stdio: newline-delimited JSON (+ legacy Content-Length frame compat)
+├── memory_core.py  # compat facade — every legacy import path keeps working
+├── version.py      # single source of truth for the version
+└── hooks / gardener / confidence / vector_memory / reranker / mirror / auto_moat ...
+```
+
+- **Standards-compliant stdio**: speaks MCP newline-delimited JSON and still parses legacy LSP `Content-Length` frames.
+- **Compat facade**: `wanyi.memory_core`, `python -m wanyi.memory_core`, `python -m wanyi` and the `wanyi` console script all keep working after the 1.1.0 module split.
+- **33 tests** (pytest, py3.10–3.12 CI matrix + ruff): stdio protocol compliance, module-split integrity (symtable-based missing-global guard) and a full 23-tool smoke pass.
 
 ## Docs
 

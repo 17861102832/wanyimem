@@ -2,6 +2,31 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 与 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [1.1.0] - 2026-08-30
+
+### Fixed（关键协议修复）
+
+- **MCP stdio 标准协议**：v1.0.x 的 stdio 传输层误用 LSP 式 `Content-Length` 帧，导致任何标准 MCP 客户端（换行分隔 JSON）都握手失败、工具清单拉不到。现改为 MCP 标准的**换行分隔 JSON**，同时**兼容解析旧式 Content-Length 帧**（向后不破坏）。新增 `tests/test_stdio_protocol.py`（6 用例：标准握手 / 23 工具清单 / 写入召回全链路 / 通知不回包 / 旧帧兼容 / **stdin EOF 干净退出**）防回归。
+- **EOF 忙循环**：stdin 关闭后主循环把 EOF 当空消息 `continue`，进程不退出、CPU 空转（正常场景被客户端杀进程掩盖）。现 `_read_message` 在 EOF 时抛出并干净退出，附回归测试。
+
+### Changed（架构重组，零逻辑改动）
+
+- **巨石拆分**：`memory_core.py`（约 3600 行单文件）机械拆分为
+  `core_base`（常量 / 工具函数 / 四因子评分 / MemoryDB 数据层）+
+  `engine`（WanYiCore + 23 工具 + MCP_TOOLS + JSON-RPC 分发）+
+  `transport`（stdio 传输层）。代码体逐字搬运，行为不变。
+- **兼容门面**：`wanyi.memory_core` 保留为 shim——`import wanyi.memory_core`、sys.path hack 下的顶层 `from memory_core import ...`（hooks.py 依赖链）、`python -m wanyi.memory_core` 与 console script `wanyi` 全部原样可用；另新增 `python -m wanyi` 入口。
+- **版本唯一真源**：新增 `wanyi/version.py`，`pyproject.toml` 动态读取（hatch）；修复 `initialize` 返回 "1.0.2"、模块 docstring 标 "v3"、`__version__` 三处互相矛盾的硬编码，现在全链路统一由 version.py 输出。
+
+### Added（质量基线）
+
+- **测试 15 → 33**（CI 矩阵 py3.10–3.12 + ruff）：
+  - stdio 协议合规 5 用例（v1.0.x 的协议级 P0 若有此测试当初就会在发布前被拦下）；
+  - 模块拆分一致性 3 用例（门面与实现同一性 / 版本唯一真源 / 顶层双模导入）；
+  - **symtable 全局名完整性守卫** 1 用例（作用域感知检查三个模块"被引用但未绑定"的名字，任何拆分遗漏的 import 直接在 CI 拦下，而非运行到冷路径才 NameError）；
+  - **23 工具全覆盖冒烟** 1 用例（按函数签名自动补齐哑元逐个真实调用，专抓 NameError 类回归，上线首日即抓到 `timedelta` 漏导入）。
+- **护栏模式 `WANYI_GUARD_MODE`**：`full`（默认，完整拦截）/ `warn`（只提醒不拦截）/ `off`，环境变量一键切换，适配不同交易/执行风格。
+
 ## [1.0.6] - 2026-08-24
 
 ### Changed（向量写入性能 — 批量嵌入）

@@ -27,7 +27,9 @@ from .memory_core import (
     WanYiCore,
 )
 
-__version__ = "1.0.6"
+# 版本唯一真源：wanyi/version.py（pyproject.toml 动态读取此处）
+from .version import __version__
+
 __all__ = [
     "LAYER_DAO",
     "LAYER_FA",

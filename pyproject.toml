@@ -4,8 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wanyimem"
-version = "1.0.6"
-description = "永不遗忘的全量记忆系统 — 事件溯源 + 过程记忆 + 语义向量检索 + sqlite-vec ANN + reranker精排 + 记忆图谱 + 元认知知识空白 + 只读Markdown镜像 + 护城河全自动，23个MCP工具"
+# 版本唯一真源 = wanyi/version.py（hatch 动态读取）
+dynamic = ["version"]
+description = "永不遗忘的全量记忆系统 — MCP标准stdio + 事件溯源 + 过程记忆 + 语义向量检索 + sqlite-vec ANN + reranker精排 + 记忆图谱 + 元认知知识空白 + 只读Markdown镜像 + 护城河全自动，23个MCP工具"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
@@ -44,6 +45,9 @@ Documentation = "https://github.com/17861102832/wanyimem"
 
 [tool.hatch.build.targets.wheel]
 packages = ["wanyi"]
+
+[tool.hatch.version]
+path = "wanyi/version.py"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
